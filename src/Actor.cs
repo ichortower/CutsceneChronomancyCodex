@@ -10,7 +10,7 @@ using Log = ichortower.TowerCore.Log;
 using Main = ichortower.TowerCore.Main;
 using SEvent = StardewValley.Event;
 // just to make the HasXFor calls nicer to read lol
-using Streams = ichortower.CCC.Stream;
+//using Streams = ichortower.CCC.Stream;
 
 namespace ichortower.CCC;
 
@@ -30,9 +30,14 @@ internal class Actor
      * movements. This works a lot like vanilla's waitForAllStationary (all actors) and
      * proceedPosition (one actor only), but it checks for ongoing movement a bit differently.
      *
+     * In particular, this command does not consider a character in a pause step during an
+     * advancedMove to have stopped (waitForAllStationary and proceedPosition both do this).
+     * This means that using this command to wait for a looping advancedMove will block
+     * forever, so do not do this without a plan to _ActorHalt from some other stream.
+     *
      * waitForAllStationary only checks .isMoving(), which returns false during a pause
      * step of an advancedMove, and can incorrectly return true if using (the undocumented)
-     * "stopAdvancedMove next".
+     * "stopAdvancedMoves next".
      * 
      * proceedPosition, meanwhile, checks for active NPCControllers, but assumes that an
      * active one must be controlling the requested NPC. This is a valid assumption in
@@ -47,34 +52,16 @@ internal class Actor
         }
         bool wait = false;
         for (int i = 1; i < args.Length; ++i) {
-            Character actor = evt.getCharacterByName(args[i]);
+            string actorName = args[i];
+            Character actor = evt.getCharacterByName(actorName);
             if (actor is null) {
-                context.LogErrorAndSkip($"no actor found with name '{args[i]}'");
+                context.LogErrorAndSkip($"no actor found with name '{actorName}'");
                 return;
             }
-            /*
-            if (actor.isEmoting) {
-                wait = true;
-                break;
-            }
-            if (actor.isMoving()) {
-                if (Streams.HasControllerFor(actor) || Streams.HasBasicMoveFor(args[i])) {
-                    wait = true;
-                    break;
-                }
-            }
-            actor.Halt();
-            */
-            // the order of these checks is important, even though the expensive ones
-            // are first. we have to rule out types of movement in this order so we can
-            // correctly detect when movement is over, or else we will spin forever
-            // (actor thinks it's moving even though it's not)
-            if (evt.npcControllers?.Exists(c => c.puppet.Equals(actor)) is true) {
-                wait = true;
-                break;
-            }
-            // see Extensions.cs
-            if (evt.HasBasicMoveFor(args[i])) {
+            // check controllers and move positions and ignore .isMoving(), so pause steps
+            // don't count as being done moving.
+            // if neither is active, it's safe (and required, for animations) to call Halt().
+            if (Streams.HasControllerFor(actor) || Streams.HasBasicMoveFor(actorName)) {
                 wait = true;
                 break;
             }
@@ -92,9 +79,9 @@ internal class Actor
      * This command stops the movement of all named actors, and removes any NPCControllers
      * that may have been puppeting them.
      *
-     * If the first argument is the string "next", then actors under an NPCController's
-     * influence will be allowed to finish the current leg of their movement before halting.
-     * In this case, the command will block until the named actors finish moving.
+     * If the first argument is the string "next", then actors will be allowed to finish the
+     * current leg of their movement before halting. In this case, the command will block
+     * until the named actors finish moving.
      */
     public static void command_ActorHalt(SEvent evt, string[] args, EventContext context)
     {
@@ -114,22 +101,21 @@ internal class Actor
         }
         List<string> puppets = new();
         for (int i = start; i < args.Length; ++i) {
-            Character actor = evt.getCharacterByName(args[i]);
+            string actorName = args[i];
+            Character actor = evt.getCharacterByName(actorName);
             if (actor is null) {
-                context.LogErrorAndSkip($"no actor found with name '{args[i]}'");
+                context.LogErrorAndSkip($"no actor found with name '{actorName}'");
                 return;
             }
-            if (nextMode && evt.npcControllers is not null) {
-                var active = evt.npcControllers.Where(c => c.puppet.Equals(actor));
-                if (active.Any()) {
-                    puppets.Add(args[i]);
-                }
-                foreach (var c in active) {
-                    c.destroyAtNextCrossroad();
+
+            if (nextMode) {
+                if (Streams.TryRemoveControllersFor(actor, Streams.RemoveTiming.AfterThisLeg) ||
+                        Streams.HasBasicMoveFor(actorName)) {
+                    puppets.Add(actorName);
                 }
             }
             else {
-                evt.npcControllers?.RemoveAll(c => c.puppet.Equals(actor));
+                _ = Streams.TryRemoveControllersFor(actor, Streams.RemoveTiming.Now);
                 actor.Halt();
             }
         }

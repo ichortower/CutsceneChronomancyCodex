@@ -64,18 +64,8 @@ internal class Stream
             context.LogErrorAndSkip(error);
             return;
         }
-        // TODO check for collisions?
-        SEvent stream = new();
-        stream.id = $"{Main.ModId}_stream_{streamId}";
-        // necessary to allow Update() to work without trying to Initialize()
-        stream.eventSwitched = true;
-        stream.ReplaceAllCommands(commands.ToArray());
-        stream.actors = evt.actors;
-        stream.farmerActors = evt.farmerActors;
-        // see Extensions.cs
-        Extensions.EventAPAM.SetValue(stream, new Dictionary<string, Vector3>());
-        OpenStreams[streamId] = stream;
-        StartStreamRunner();
+
+        Streams.New(evt, streamId, commands.ToArray());
         ++evt.CurrentCommand;
     }
 
@@ -152,12 +142,12 @@ internal class Stream
             return;
         }
         for (int i = 1; i < args.Length; ++i) {
-            if (!OpenStreams.TryGetValue(args[i], out SEvent target)) {
+            if (!Streams.OpenStreams.TryGetValue(args[i], out SEvent target)) {
                 context.LogErrorAndSkip($"requested unknown stream id '{args[i]}'");
                 return;
             }
             target.CurrentCommand = target.eventCommands.Length;
-            target.int_useMeForAnything = StreamEnded;
+            target.int_useMeForAnything = Streams.StreamEnded;
         }
         ++evt.CurrentCommand;
     }
@@ -176,7 +166,7 @@ internal class Stream
             return;
         }
         for (int i = 1; i < args.Length; ++i) {
-            if (!OpenStreams.TryGetValue(args[i], out SEvent target)) {
+            if (!Streams.OpenStreams.TryGetValue(args[i], out SEvent target)) {
                 context.LogErrorAndSkip($"requested unknown stream id '{args[i]}'");
                 return;
             }
@@ -201,49 +191,55 @@ internal class Stream
             return;
         }
         for (int i = 1; i < args.Length; ++i) {
-            if (!OpenStreams.TryGetValue(args[i], out SEvent target)) {
+            if (!Streams.OpenStreams.TryGetValue(args[i], out SEvent target)) {
                 context.LogErrorAndSkip($"requested unknown stream id '{args[i]}'");
                 return;
             }
-            if (target.int_useMeForAnything != StreamEnded) {
+            if (target.int_useMeForAnything != Streams.StreamEnded) {
                 return;
             }
         }
         ++evt.CurrentCommand;
     }
 
+}
 
-    /*
-    internal static bool HasControllerFor(Character actor)
+
+/*
+ *
+ * This class is where the implementation details live.
+ * It is named "Streams" to make certain calls nicer to read.
+ *
+ */
+
+internal class Streams
+{
+    internal const int StreamEnded = -484;
+
+    internal static System.EventHandler<UpdateTickedEventArgs> streamRunner = null;
+
+    internal static Dictionary<string, SEvent> OpenStreams = new();
+
+    internal static void New(SEvent source, string streamId, string[] commands)
     {
-        return OpenStreams.Values.Any((evt) => {
-            return evt.npcControllers?.Any(c => c.puppet.Equals(actor)) ?? false;
-        });
+        // TODO check for collisions?
+        SEvent stream = new();
+        stream.id = $"{Main.ModId}_stream_{streamId}";
+        // necessary to allow Update() to work without trying to Initialize()
+        stream.eventSwitched = true;
+        stream.ReplaceAllCommands(commands);
+        // actors and farmerActors should be ref copies in the new event
+        stream.actors = source.actors;
+        stream.farmerActors = source.farmerActors;
+        // see Extensions.cs
+        // actorPositionsAfterMove must be manually init or commands barf
+        Extensions.EventAPAM.SetValue(stream, new Dictionary<string, Vector3>());
+
+        OpenStreams[streamId] = stream;
+        StartStreamRunner();
     }
 
-    internal static bool HasBasicMoveFor(string actorName)
-    {
-        return OpenStreams.Values.Any((evt) => {
-            var moves = (Dictionary<string, Vector3>) Extensions.EventAPAM.GetValue(evt);
-            return moves.ContainsKey(actorName);
-        });
-    }
-    */
-
-
-    /*
-     * 
-     * Implementation details
-     * 
-     */
-
-    private const int StreamEnded = -484;
-
-    private static System.EventHandler<UpdateTickedEventArgs> streamRunner = null;
-
-    private static Dictionary<string, SEvent> OpenStreams = new();
-
-    private static void StartStreamRunner()
+    internal static void StartStreamRunner()
     {
         if (streamRunner is not null) {
             return;
@@ -253,7 +249,8 @@ internal class Stream
         Main.Helper.Events.GameLoop.UpdateTicked += streamRunner;
     }
 
-    private static void StreamFunction(object sender, UpdateTickedEventArgs tickedArgs) {
+    internal static void StreamFunction(object sender, UpdateTickedEventArgs tickedArgs)
+    {
         if (Game1.eventOver || !Game1.eventUp) {
             StopStreamRunner();
             return;
@@ -279,14 +276,67 @@ internal class Stream
         }
     }
 
-    private static void StopStreamRunner()
+    internal static void StopStreamRunner()
     {
         if (streamRunner is null) {
             return;
         }
         Log.Debug("Stopping stream runner");
         Main.Helper.Events.GameLoop.UpdateTicked -= streamRunner;
+        OpenStreams.Clear();
         streamRunner = null;
+    }
+
+    internal static bool HasControllerFor(Character actor)
+    {
+        if (Game1.CurrentEvent is null) {
+            return false;
+        }
+        IEnumerable<SEvent> fabric = OpenStreams.Values.Concat(new[] {Game1.CurrentEvent});
+        return fabric.Any((evt) => {
+            return evt?.npcControllers?.Any(c => c.puppet.Equals(actor)) ?? false;
+        });
+    }
+
+    internal static bool TryRemoveControllersFor(Character actor, RemoveTiming timing)
+    {
+        int total = 0;
+        IEnumerable<SEvent> fabric = OpenStreams.Values.Concat(new[] {Game1.CurrentEvent});
+        if (timing == RemoveTiming.Now) {
+            foreach (SEvent evt in fabric) {
+                total += (evt?.npcControllers?.RemoveAll(c => c.puppet.Equals(actor)) ?? 0);
+            }
+        }
+        else if (timing == RemoveTiming.AfterThisLeg) {
+            foreach (SEvent evt in fabric) {
+                if (evt?.npcControllers is null) {
+                    continue;
+                }
+                var active = evt.npcControllers.Where(c => c.puppet.Equals(actor));
+                foreach (NPCController c in active) {
+                    c.destroyAtNextCrossroad();
+                    ++total;
+                }
+            }
+        }
+        return total > 0;
+    }
+
+    internal enum RemoveTiming {
+        Now,
+        AfterThisLeg,
+    }
+
+    internal static bool HasBasicMoveFor(string actorName)
+    {
+        if (Game1.CurrentEvent is null) {
+            return false;
+        }
+        IEnumerable<SEvent> fabric = OpenStreams.Values.Concat(new[] {Game1.CurrentEvent});
+        return fabric.Any((evt) => {
+            var moves = (Dictionary<string, Vector3>)Extensions.EventAPAM.GetValue(evt);
+            return moves.ContainsKey(actorName);
+        });
     }
 
 }
