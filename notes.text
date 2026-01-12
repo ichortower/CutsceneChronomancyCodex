@@ -1,0 +1,49 @@
+temporary change map tiles (undone after event ends). copy from HML
+temporary apply .tmx as map overlay (undone after event ends). copy from HML
+
+look into:
+rewind/replay/hot reload
+leoMemory?
+
+
+event commands with side effects that should be neutralized when isMemory:
+ETC time advance
+action
+mineDeath
+hospitalDeath
+end (skipActions, warp location, etc.)
+setSkipActions
+doAction (maybe. probably depends on if any map checkActions can have side effects)
+addCookingRecipe
+addCraftingRecipe
+hostMail
+mail
+mailToday
+addQuest
+removeQuest
+# completeQuest
+addSpecialOrder
+removeSpecialOrder
+addItem
+awardFestivalPrize
+cutscene (technically but nobody is going to use this)
+cave (again, not usable)
+money
+rustyKey
+animalNaming (rip)
+removeItem
+friendship
+addMailReceived
+addWorldState
+farmerEat (cursed because still would want animation)
+grandpaCandles (rip)
+grandpaEvaluation(2) (rip)
+addConversationTopic
+dump
+eventSeen
+questionAnswered
+gainSkill
+
+probably the best way to do this is take a snapshot when an isMemory event begins, and restore it
+when it completes, so we don't have to patch the commands or undo anything; we just revert global
+state to how it was before.

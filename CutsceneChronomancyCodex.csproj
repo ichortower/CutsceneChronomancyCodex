@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <Version>1.0.0</Version>
+        <TargetFramework>net6.0</TargetFramework>
+
+        <ModFolderName>CutsceneChronomancyCodex</ModFolderName>
+        <EnableHarmony>true</EnableHarmony>
+    </PropertyGroup>
+
+    <Import Project="..\TowerCore\TowerCore.msbuild" />
+
+    <ItemGroup>
+        <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.4.0" />
+    </ItemGroup>
+</Project>

@@ -1,0 +1,11 @@
+{
+  "Name": "Cutscene Chronomancy Codex",
+  "Author": "ichortower",
+  "Description": "Control time itself and give your events new and useful powers.",
+  "Version": "%ProjectVersion%",
+  "UniqueID": "ichortower.CCC",
+  "EntryDll": "CutsceneChronomancyCodex.dll",
+  "MinimumApiVersion": "4.1.0",
+  "UpdateKeys": ["Nexus:-1", "GitHub:ichortower/CutsceneChronomancyCodex"],
+  "Dependencies": []
+}
