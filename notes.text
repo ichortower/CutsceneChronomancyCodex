@@ -1,6 +1,9 @@
 look into:
 rewind/replay/hot reload
-leoMemory?
+leoMemory? (see below)
+playerControl
+CG without map jank
+ambientLight time/fade control
 
 
 event commands with side effects that should be neutralized when isMemory:
