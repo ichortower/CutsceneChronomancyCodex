@@ -175,6 +175,10 @@ internal class World
                 Game1.warpCharacter(person,
                         target.targetLocationName,
                         target.targetTile);
+                if (target.targetLocationName == "IslandSouth") {
+                    person.shouldWearIslandAttire.Value = true;
+                }
+                person.ChooseAppearance();
                 person.faceDirection(target.facingDirection);
                 person.Sprite.faceDirectionStandard(target.facingDirection);
                 // activate route behavior (e.g. animation). manually set
