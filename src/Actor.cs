@@ -9,8 +9,6 @@ using System.Collections.Generic;
 using Log = ichortower.TowerCore.Log;
 using Main = ichortower.TowerCore.Main;
 using SEvent = StardewValley.Event;
-// just to make the HasXFor calls nicer to read lol
-//using Streams = ichortower.CCC.Stream;
 
 namespace ichortower.CCC;
 
@@ -58,7 +56,7 @@ internal class Actor
                 context.LogErrorAndSkip($"no actor found with name '{actorName}'");
                 return;
             }
-            // check controllers and move positions and ignore .isMoving(), so pause steps
+            // check controllers and move targets and ignore .isMoving(), so pause steps
             // don't count as being done moving.
             // if neither is active, it's safe (and required, for animations) to call Halt().
             if (Streams.HasControllerFor(actor) || Streams.HasBasicMoveFor(actorName)) {
@@ -74,31 +72,42 @@ internal class Actor
 
 
     /*
-     * ichortower.CCC_ActorHalt [next] <actor> [actor... ]
+     * ichortower.CCC_ActorHalt [next|waitnext] <actor> [actor... ]
      *
      * This command stops the movement of all named actors, and removes any NPCControllers
      * that may have been puppeting them.
      *
-     * If the first argument is the string "next", then actors will be allowed to finish the
-     * current leg of their movement before halting. In this case, the command will block
-     * until the named actors finish moving.
+     * The first argument can be one of two special strings in order to change the behavior
+     * (both case-insensitive):
+     *
+     *   "next": actors will be allowed to finish the current leg of their movement before
+     *     halting.
+     *   "waitnext": as next, but this command will also block until the movements complete.
+     *     this is done by inserting the correct _ActorAwaitMovement command.
+     *
+     * Generally, waitnext is advised over next, since some moves may not halt correctly
+     * unless the _ActorAwaitMovement command helps. Next is useful if you have another
+     * stream awaiting the movement already.
      */
     public static void command_ActorHalt(SEvent evt, string[] args, EventContext context)
     {
-        if (args.Length < 2) {
+        bool nextMode = false;
+        bool waitMode = false;
+        int start = 1;
+        if (args[start].EqualsIgnoreCase("next")) {
+            nextMode = true;
+            ++start;
+        }
+        else if (args[start].EqualsIgnoreCase("waitnext")) {
+            nextMode = true;
+            waitMode = true;
+            ++start;
+        }
+        if (args.Length <= start) {
             context.LogErrorAndSkip("requires at least one actor argument");
             return;
         }
-        bool nextMode = false;
-        int start = 1;
-        if (args[start].EqualsIgnoreCase("next")) {
-            ++start;
-            nextMode = true;
-            if (args.Length < 3) {
-                context.LogErrorAndSkip("requires at least one actor argument");
-                return;
-            }
-        }
+
         List<string> puppets = new();
         for (int i = start; i < args.Length; ++i) {
             string actorName = args[i];
@@ -109,6 +118,7 @@ internal class Actor
             }
 
             if (nextMode) {
+                // don't need to do any removal on basic moves
                 if (Streams.TryRemoveControllersFor(actor, Streams.RemoveTiming.AfterThisLeg) ||
                         Streams.HasBasicMoveFor(actorName)) {
                     puppets.Add(actorName);
@@ -116,10 +126,11 @@ internal class Actor
             }
             else {
                 _ = Streams.TryRemoveControllersFor(actor, Streams.RemoveTiming.Now);
+                _ = Streams.TryRemoveBasicMovesFor(actorName);
                 actor.Halt();
             }
         }
-        if (puppets.Count > 0) {
+        if (waitMode && puppets.Count > 0) {
             evt.InsertNextCommand($"{Main.ModId}_ActorAwaitMovement {String.Join(' ', puppets)}");
         }
         ++evt.CurrentCommand;

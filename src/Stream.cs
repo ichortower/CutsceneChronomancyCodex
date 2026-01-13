@@ -329,7 +329,7 @@ internal class Streams
 
     internal static bool HasBasicMoveFor(string actorName)
     {
-        if (Game1.CurrentEvent is null) {
+        if (Game1.CurrentEvent is null || actorName is null) {
             return false;
         }
         IEnumerable<SEvent> fabric = OpenStreams.Values.Concat(new[] {Game1.CurrentEvent});
@@ -337,6 +337,22 @@ internal class Streams
             var moves = (Dictionary<string, Vector3>)Extensions.EventAPAM.GetValue(evt);
             return moves.ContainsKey(actorName);
         });
+    }
+
+    internal static bool TryRemoveBasicMovesFor(string actorName)
+    {
+        if (Game1.CurrentEvent is null || actorName is null) {
+            return false;
+        }
+        IEnumerable<SEvent> fabric = OpenStreams.Values.Concat(new[] {Game1.CurrentEvent});
+        int total = 0;
+        foreach (SEvent evt in fabric) {
+            var moves = (Dictionary<string, Vector3>)Extensions.EventAPAM.GetValue(evt);
+            if (moves.Remove(actorName)) {
+                ++total;
+            }
+        }
+        return total > 0;
     }
 
 }
