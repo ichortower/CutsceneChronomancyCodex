@@ -226,7 +226,7 @@ internal class Streams
         SEvent stream = new();
         stream.id = $"{Main.ModId}_stream_{streamId}";
         // necessary to allow Update() to work without trying to Initialize()
-        stream.eventSwitched = true;
+        //stream.eventSwitched = true;
         stream.ReplaceAllCommands(commands);
         // actors and farmerActors should be ref copies in the new event
         stream.actors = source.actors;
@@ -268,7 +268,8 @@ internal class Streams
             bool simul = false;
             do {
                 int prev = e.CurrentCommand;
-                e.Update(Game1.currentLocation, Game1.currentGameTime);
+                // see Extensions.cs
+                e.UpdateStream(Game1.currentLocation, Game1.currentGameTime);
                 if (prev != e.CurrentCommand) {
                     simul = e.simultaneousCommand;
                 }

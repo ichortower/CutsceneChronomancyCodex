@@ -2,6 +2,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
+using StardewValley.Triggers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,11 +22,14 @@ namespace ichortower.CCC
                 typeof(ichortower.CCC.Actor),
                 typeof(ichortower.CCC.Stream),
                 typeof(ichortower.CCC.Viewport),
+                typeof(ichortower.CCC.World),
             };
             types.ForEach(RegisterCommands);
             // TODO unhardcode this
             StardewValley.Event.RegisterCommandAlias($"{Main.ModId}_StreamBegin",
                     $"{Main.ModId}_StreamStart");
+            TriggerActionManager.RegisterAction($"{Main.ModId}_WorldAdvanceTime",
+                    ichortower.CCC.World.traction_WorldAdvanceTime);
         }
 
         private static void RegisterCommands(Type t)
