@@ -169,16 +169,14 @@ internal class World
                         BindingFlags.NonPublic | BindingFlags.Instance);
                 reo.SetValue(person, new int[]{});
                 person.EndActivityRouteEndBehavior();
+                // set up island attire according to destination
+                person.shouldWearIslandAttire.Value = (target.targetLocationName == "IslandSouth");
                 // move character to destination. face direction, then
                 // force sprite to face that direction for real (resets
                 // frame to neutral standing pose).
                 Game1.warpCharacter(person,
                         target.targetLocationName,
                         target.targetTile);
-                if (target.targetLocationName == "IslandSouth") {
-                    person.shouldWearIslandAttire.Value = true;
-                }
-                person.ChooseAppearance();
                 person.faceDirection(target.facingDirection);
                 person.Sprite.faceDirectionStandard(target.facingDirection);
                 // activate route behavior (e.g. animation). manually set
