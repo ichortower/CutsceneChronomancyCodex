@@ -26,6 +26,10 @@ public static class Extensions
      */
     internal static void UpdateStream(this SEvent evt, GameLocation location, GameTime time)
     {
+        if (evt.Equals(Game1.CurrentEvent)) {
+            evt.Update(location, time);
+            return;
+        }
         if ((bool) EventFinished.GetValue(evt)) {
             return;
         }

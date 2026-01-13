@@ -44,26 +44,6 @@ internal class World
             TriggerActionContext context,
             out string error)
     {
-        /*
-        error = null;
-        if (Game1.multiplayerMode != Game1.singlePlayer) {
-            Log.Info($"Ignored {args[0]}: game is not in single-player mode.");
-            return true;
-        }
-        int targetTime = 0;
-        if (!ArgUtility.TryGetInt(args, 1, out targetTime, out error)) {
-            return false;
-        }
-        if (targetTime <= Game1.timeOfDay) {
-            Log.Info($"Ignored {args[0]}: target time {targetTime} is not in the future.");
-            return true;
-        }
-        if (targetTime >= 2600) {
-            error = $"Target time is too late. ({targetTime} >= 2600)";
-            return false;
-        }
-        */
-
         int targetTime = 0;
         if (!ArgUtility.TryGetInt(args, 1, out targetTime, out error)) {
             return false;
@@ -193,4 +173,91 @@ internal class World
         error = null;
         return true;
     }
+
+
+    /*
+     * ichortower.CCC_TemporaryMapTiles (<layer> <x> <y> <sheet> <index>)+
+     *
+     * Make any number of temporary tile edits to the event map. Tile edits normally
+     * persist, so this uses onEventFinished to undo the changes (by reloading the map)
+     * when the event finishes.
+     *
+     * Use a negative index (e.g. -1) to remove a tile. Sheet will be
+     * ignored in this case.
+     */
+    public static void command_TemporaryMapTiles(SEvent evt, string[] args, EventContext context)
+    {
+        int changes = 0;
+        string error;
+        for (int i = 1; i < args.Length; i += 5) {
+            if (!ArgUtility.TryGet(args, i, out string layer, out error,
+                    allowBlank: false, "string layer") ||
+                !ArgUtility.TryGetPoint(args, i+1, out Point pos, out error,
+                    "Point pos") ||
+                !ArgUtility.TryGet(args, i+3, out string sheet, out error,
+                    allowBlank: false, "string sheet") ||
+                !ArgUtility.TryGetInt(args, i+4, out int index, out error,
+                    "int index")) {
+                context.LogError(error);
+                continue;
+            }
+            if (index < 0) {
+                context.Location.removeTile(pos.X, pos.Y, layer);
+            }
+            else {
+                context.Location.setMapTile(pos.X, pos.Y, index, layer, sheet);
+            }
+            ++changes;
+        }
+        if (changes > 0 && !revertQueued) {
+            evt.onEventFinished += delegate {
+                RevertMap(context.Location);
+            };
+            revertQueued = true;
+        }
+        evt.CurrentCommand++;
+    }
+
+    public static void command_TemporaryMapOverride(SEvent evt, string[] args, EventContext context)
+    {
+        string error;
+        if (!ArgUtility.TryGet(args, 1, out string asset, out error,
+                allowBlank: false, "string asset")) {
+            context.LogErrorAndSkip(error);
+            return;
+        }
+        if (!ArgUtility.TryGetPoint(args, 2, out Point pos, out error, "Point coords")) {
+            context.LogErrorAndSkip(error);
+            return;
+        }
+        // -1, -1 is fine for width/height because ApplyMapOverride doesn't
+        // use the values
+        Microsoft.Xna.Framework.Rectangle destRect = new(pos.X, pos.Y, -1, -1);
+        Game1.currentLocation.ApplyMapOverride(asset, null, destRect);
+        tempOverrides.Add(asset);
+        if (!revertQueued) {
+            evt.onEventFinished += delegate {
+                RevertMap(context.Location);
+            };
+            revertQueued = true;
+        }
+        evt.CurrentCommand++;
+    }
+
+
+    internal static void RevertMap(GameLocation loc)
+    {
+        HashSet<string> amo = (HashSet<string>)
+                typeof(GameLocation).GetField("_appliedMapOverrides",
+                    BindingFlags.NonPublic | BindingFlags.Instance)
+                .GetValue(loc);
+        foreach (string name in tempOverrides) {
+            amo.Remove(name);
+        }
+        loc.loadMap(loc.mapPath.Value, force_reload: true);
+        tempOverrides.Clear();
+        revertQueued = false;
+    }
+    internal static List<string> tempOverrides = new();
+    internal static bool revertQueued = false;
 }

@@ -111,7 +111,7 @@ internal class Stream
         int duration = (times.Count > 1 ? Game1.random.ChooseFrom(times) : times[0]);
         evt.ReplaceCurrentCommand($"precisePause {duration}");
         // update immediately so we don't waste a tick before starting the timer
-        evt.Update(context.Location, context.Time);
+        evt.UpdateStream(context.Location, context.Time);
     }
 
 
