@@ -194,7 +194,7 @@ calculated), NPCs will walk through each other. I may address this in the
 future, if I can figure out how.
 
 
-## `ActorAwaitMovement`
+### `ActorAwaitMovement`
 
 `ichortower.CCC_ActorAwaitMovement <actor> [actor...]`
 
@@ -204,9 +204,9 @@ and `proceedPosition` (one actor only), but it allows any number of actors,
 and it checks for ongoing movement a bit differently.
 
 In particular, this command does not consider a character in a pause step
-during an advancedMove to have stopped (waitForAllStationary and
-proceedPosition both do this). This means that using this command to wait for
-a looping advancedMove will block forever, so do not do this without a plan to
+during an advancedMove to have stopped (`waitForAllStationary` and
+`proceedPosition` both do this). This means that using this command to wait for
+a looping `advancedMove` will block forever, so do not do this without a plan to
 call `ActorHalt` from some other stream.
 
 
