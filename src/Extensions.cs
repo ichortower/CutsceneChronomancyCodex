@@ -93,17 +93,6 @@ public static class Extensions
             c.puppet.isCharging = !evt.isFestival;
             return c.update(time, location, evt.npcControllers);
        });
-        /*
-        if (evt.npcControllers is null) {
-            return;
-        }
-        for (int i = evt.npcControllers.Count - 1; i >= 0; --i) {
-            evt.npcControllers[i].puppet.isCharging = !this.isFestival;
-            if (evt.npcControllers[i].update(time, location, evt.npcControllers)) {
-                evt.npcControllers.RemoveAt(i);
-            }
-        }
-        */
     }
 
     internal static void UpdateVanillaViewport(this SEvent evt, GameLocation location, GameTime time)
@@ -216,17 +205,19 @@ public static class Extensions
                 }
                 break;
             }
-            if (apam.Count == 0) {
-                if (evt.continueAfterMove) {
-                    evt.continueAfterMove = false;
-                }
-                else {
-                    ++evt.CurrentCommand;
-                }
+        }
+        if (apam.Count == 0) {
+            if (evt.continueAfterMove) {
+                Log.Debug("oops");
+                evt.continueAfterMove = false;
             }
-            if (!evt.continueAfterMove) {
-                return false;
+            else {
+                Log.Debug("advance command");
+                ++evt.CurrentCommand;
             }
+        }
+        if (!evt.continueAfterMove) {
+            return false;
         }
         return true;
     }

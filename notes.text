@@ -9,6 +9,7 @@ ambientLight time/fade control
 [ ] clear any other static goo that might stick around
 [ ] auto-remove stream runner when no active streams
 [ ] fix speed farmer not working with actorpathto
+[ ] fix streams running when game not focused/updating
 
 
 event commands with side effects that should be neutralized when isMemory:
