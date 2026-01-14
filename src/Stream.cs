@@ -65,7 +65,9 @@ internal class Stream
             return;
         }
 
-        Streams.New(evt, streamId, commands.ToArray());
+        if (!Streams.New(evt, streamId, commands.ToArray())) {
+            context.LogError($"stream id '{streamId}' currently in use");
+        }
         ++evt.CurrentCommand;
     }
 
@@ -220,9 +222,12 @@ internal class Streams
 
     internal static Dictionary<string, SEvent> OpenStreams = new();
 
-    internal static void New(SEvent source, string streamId, string[] commands)
+    internal static bool New(SEvent source, string streamId, string[] commands)
     {
-        // TODO check for collisions?
+        if (OpenStreams.ContainsKey(streamId) &&
+                OpenStreams[streamId].int_useMeForAnything != StreamEnded) {
+            return false;
+        }
         SEvent stream = new();
         stream.id = $"{Main.ModId}_stream_{streamId}";
         // necessary to allow Update() to work without trying to Initialize()
@@ -237,6 +242,7 @@ internal class Streams
 
         OpenStreams[streamId] = stream;
         StartStreamRunner();
+        return true;
     }
 
     internal static void StartStreamRunner()
