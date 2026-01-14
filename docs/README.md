@@ -22,3 +22,19 @@ Here are some of the things you can do with these commands:
 
 If these things appeal to you, head over to the [author guide](author-guide.md)
 for details!
+
+
+## How to Use
+
+Whether you're a user or a mod author, all you have to do to use this mod is
+install it like any other: download it and unzip it into your Mods folder.
+There's no API or data assets or anything: this just uses built-in code
+endpoints to register new event commands (and one trigger action), so as long
+as it's present, the commands will be available.
+
+
+## Building
+
+If you are attempting to build this mod from source, you will need
+[TowerCore](https://github.com/ichortower/TowerCore), my shared code repository.
+Clone it alongside this repository and you should have no problems.
