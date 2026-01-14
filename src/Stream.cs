@@ -126,7 +126,8 @@ internal class Stream
      */
     public static void command_StreamLoop(SEvent evt, string[] args, EventContext context)
     {
-        evt.CurrentCommand = 0;
+        int target = (evt.Equals(Game1.CurrentEvent) ? 3 : 0);
+        evt.CurrentCommand = target;
     }
 
 
@@ -195,6 +196,10 @@ internal class Stream
         for (int i = 1; i < args.Length; ++i) {
             if (!Streams.OpenStreams.TryGetValue(args[i], out SEvent target)) {
                 context.LogErrorAndSkip($"requested unknown stream id '{args[i]}'");
+                return;
+            }
+            if (target.Equals(evt)) {
+                context.LogErrorAndSkip($"stream '{args[i]}' cannot await itself");
                 return;
             }
             if (target.int_useMeForAnything != Streams.StreamEnded) {
