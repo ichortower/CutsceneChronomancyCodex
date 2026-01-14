@@ -4,7 +4,6 @@
         <TargetFramework>net6.0</TargetFramework>
 
         <ModFolderName>CutsceneChronomancyCodex</ModFolderName>
-        <EnableHarmony>true</EnableHarmony>
     </PropertyGroup>
 
     <Import Project="..\TowerCore\TowerCore.msbuild" />
