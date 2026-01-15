@@ -12,7 +12,7 @@ using Log = ichortower.TowerCore.Log;
 using Main = ichortower.TowerCore.Main;
 using SEvent = StardewValley.Event;
 
-namespace ichortower.CCC;
+namespace ichortower.ECC;
 
 /*
  * 
@@ -24,7 +24,7 @@ internal class Stream
 {
 
     /*
-     * ichortower.CCC_StreamStart <id>
+     * ichortower.ECC_StreamStart <id>
      *
      * Starts a stream, which consists of all commands following this one and until a matching
      * _StreamEnd command. A stream will start executing immediately, disregarding the main
@@ -73,7 +73,7 @@ internal class Stream
 
 
     /*
-     * ichortower.CCC_StreamEnd
+     * ichortower.ECC_StreamEnd
      *
      * This command ends the declaration of a stream's command list. There should be one of
      * these for each _StreamStart.
@@ -90,7 +90,7 @@ internal class Stream
 
 
     /*
-     * ichortower.CCC_StreamPause <duration> [duration... ]
+     * ichortower.ECC_StreamPause <duration> [duration... ]
      *
      * Pauses execution of the current stream (works on the "main" script as well, since
      * streams are no different technically). Accepts any number of integer arguments
@@ -118,7 +118,7 @@ internal class Stream
 
 
     /*
-     * ichortower.CCC_StreamLoop
+     * ichortower.ECC_StreamLoop
      *
      * This command resets the current stream's command index to 0, causing it to restart
      * from the beginning. This creates a stream which loops continuously until stopped
@@ -132,7 +132,7 @@ internal class Stream
 
 
     /*
-     * ichortower.CCC_StreamHalt <id> [id... ]
+     * ichortower.ECC_StreamHalt <id> [id... ]
      *
      * This command terminates all specified streams by setting their command indexes beyond
      * the ends of their scripts and setting them as having ended, so the stream runner will
@@ -157,7 +157,7 @@ internal class Stream
 
 
     /*
-     * ichortower.CCC_StreamRestart <id> [id... ]
+     * ichortower.ECC_StreamRestart <id> [id... ]
      *
      * This command tells all specified streams to start over by setting their command indexes
      * to 0 and unsetting the ended status.
@@ -182,7 +182,7 @@ internal class Stream
 
 
     /*
-     * ichortower.CCC_StreamAwait <id> [id... ]
+     * ichortower.ECC_StreamAwait <id> [id... ]
      *
      * This command blocks until all specified streams have finished executing. Please take
      * care not to await a stream which is looping, as this will never complete unless some

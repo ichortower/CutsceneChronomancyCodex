@@ -1,4 +1,4 @@
-# Cutscene Chronomancy Codex - Author Guide
+# Event Command Codex - Author Guide
 
 This document explains how to use the event commands added by this mod.
 
@@ -82,8 +82,8 @@ well, and not only inside a stream context.
 
 ### `StreamStart`
 
-`ichortower.CCC_StreamStart <id>`
-`ichortower.CCC_StreamBegin <id>` (alias)
+`ichortower.ECC_StreamStart <id>`
+`ichortower.ECC_StreamBegin <id>` (alias)
 
 This command declares a stream. When it is encountered, it immediately scans
 ahead through the command list looking for a matching `StreamEnd` command, and
@@ -103,7 +103,7 @@ commands from any other stream (`StreamAwait`, `StreamHalt`, etc.).
 
 ### `StreamEnd`
 
-`ichortower.CCC_StreamEnd`
+`ichortower.ECC_StreamEnd`
 
 This command does not do anything on its own (in fact, executing it is an
 error, since it means your Starts and Ends are not balanced). It is merely a
@@ -116,7 +116,7 @@ command list boundaries.
 
 ### `StreamAwait`
 
-`ichortower.CCC_StreamAwait <id> [id...]`
+`ichortower.ECC_StreamAwait <id> [id...]`
 
 This command takes one or more stream ids and blocks until they are all
 complete (they have run out of commands and are sitting idle, or they have
@@ -133,7 +133,7 @@ any protection against circular awaiting, so be careful not to do that.
 
 ### `StreamPause`
 
-`ichortower.CCC_StreamPause <int> [int...]`
+`ichortower.ECC_StreamPause <int> [int...]`
 
 This command is like `pause`, but instead of using a global timer, this blocks
 execution only on the current stream.
@@ -152,7 +152,7 @@ this one has a clearer name, and this one allows randomness.
 
 ### `StreamHalt`
 
-`ichortower.CCC_StreamHalt <id> [id...]`
+`ichortower.ECC_StreamHalt <id> [id...]`
 
 This command terminates the streams specified in the arguments. A halted stream
 has its command index set to beyond the end of its command list, and has its
@@ -164,7 +164,7 @@ A stream *can* halt itself, although I don't know what use case that has.
 
 ### `StreamRestart`
 
-`ichortower.CCC_StreamRestart <id> [id...]`
+`ichortower.ECC_StreamRestart <id> [id...]`
 
 This command restarts the specified streams. A restarted stream has its command
 index set to 0 and its idle state forcibly unset.
@@ -177,7 +177,7 @@ A stream can restart itself (but see `StreamLoop`).
 
 ### `StreamLoop`
 
-`ichortower.CCC_StreamLoop`
+`ichortower.ECC_StreamLoop`
 
 A shortcut version of `StreamRestart` which works only on the current stream
 and restarts it by setting its command index to 0.
@@ -194,7 +194,7 @@ These commands give you more flexibility when controlling actors (characters).
 
 ### `ActorPathTo`
 
-`ichortower.CCC_ActorPathTo <actor> <x> <y> <facing> [wait]`
+`ichortower.ECC_ActorPathTo <actor> <x> <y> <facing> [wait]`
 
 This command tells any actor (farmer or NPC) to move to the given map
 coordinates, by using the pathfinder to figure out how to get there instead of
@@ -213,7 +213,7 @@ future, if I can figure out how.
 
 ### `ActorAwaitMovement`
 
-`ichortower.CCC_ActorAwaitMovement <actor> [actor...]`
+`ichortower.ECC_ActorAwaitMovement <actor> [actor...]`
 
 This command blocks until all named event actors have completed their current
 movements. This works a lot like vanilla's `waitForAllStationary` (all actors)
@@ -229,7 +229,7 @@ call `ActorHalt` from some other stream.
 
 ### `ActorHalt`
 
-`ichortower.CCC_ActorHalt [next|waitnext] <actor> [actor...]`
+`ichortower.ECC_ActorHalt [next|waitnext] <actor> [actor...]`
 
 This command stops the movement of all named actors, and removes any
 NPCControllers that may have been puppeting them.
@@ -263,7 +263,7 @@ well.
 
 ### `ViewportMove`
 
-`ichortower.CCC_ViewportMove <x> <y> <time> [override] [wait]`
+`ichortower.ECC_ViewportMove <x> <y> <time> [override] [wait]`
 
 This command sets up a viewport movement.
 
@@ -290,14 +290,14 @@ vanilla's `viewport move` moves the viewport. Do not mix and match them.
 
 ### `ViewportAwait`
 
-`ichortower.CCC_ViewportAwait`
+`ichortower.ECC_ViewportAwait`
 
 This command blocks until all queued viewport moves have completed.
 
 
 ### `ViewportStop`
 
-`ichortower.CCC_ViewportStop`
+`ichortower.ECC_ViewportStop`
 
 This command immediately halts and empties the viewport move queue.
 
@@ -307,7 +307,7 @@ This command immediately halts and empties the viewport move queue.
 
 ### `WorldAdvanceTime`
 
-`ichortower.CCC_WorldAdvanceTime <hhmm>`
+`ichortower.ECC_WorldAdvanceTime <hhmm>`
 
 This command causes world time to pass when the event finishes. In addition to
 advancing the game clock, machines are given processing time and all NPCs are
@@ -333,7 +333,7 @@ their day which you may ruin if you surprise them with this.
 
 ### `TemporaryMapTiles`
 
-`ichortower.CCC_TemporaryMapTiles (<layer> <x> <y> <sheet> <index>)+`
+`ichortower.ECC_TemporaryMapTiles (<layer> <x> <y> <sheet> <index>)+`
 
 This command temporarily replaces map tiles on the current map, reverting them
 to their previous state (by reloading the map) when the event ends.
@@ -345,7 +345,7 @@ case, sheet will be ignored, so you can pass something meaningless like `-`.
 
 ### `TemporaryMapOverride`
 
-`ichortower.CCC_TemporaryMapOverride (<asset> <x> <y>)+`
+`ichortower.ECC_TemporaryMapOverride (<asset> <x> <y>)+`
 
 This command temporarily applies one or more map overrides to the current
 location. The overrides will be removed (and the map reloaded) when the event

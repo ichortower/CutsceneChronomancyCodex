@@ -11,13 +11,13 @@ using Log = ichortower.TowerCore.Log;
 using Main = ichortower.TowerCore.Main;
 using SEvent = StardewValley.Event;
 
-namespace ichortower.CCC;
+namespace ichortower.ECC;
 
 internal class World
 {
 
     /*
-     * ichortower.CCC_WorldAdvanceTime <hhmm>
+     * ichortower.ECC_WorldAdvanceTime <hhmm>
      *
      * Causes world time to pass when this event finishes: machines and objects process, etc.
      * NPCs get warped along their schedule to where they should be at the new time, so they
@@ -176,7 +176,7 @@ internal class World
 
 
     /*
-     * ichortower.CCC_TemporaryMapTiles (<layer> <x> <y> <sheet> <index>)+
+     * ichortower.ECC_TemporaryMapTiles (<layer> <x> <y> <sheet> <index>)+
      *
      * Make any number of temporary tile edits to the event map. Tile edits normally
      * persist, so this uses onEventFinished to undo the changes (by reloading the map)

@@ -11,7 +11,7 @@ using Log = ichortower.TowerCore.Log;
 
 using SEvent = StardewValley.Event;
 
-namespace ichortower.CCC;
+namespace ichortower.ECC;
 
 public static class Extensions
 {

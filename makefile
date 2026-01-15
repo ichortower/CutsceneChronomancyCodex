@@ -1,4 +1,4 @@
-MOD_NAME=CutsceneChronomancyCodex
+MOD_NAME=EventCommandCodex
 MODE?=GOG
 GAME_DIR=${HOME}/GOG Games/Stardew Valley/game
 ifeq (${MODE}, steam)

@@ -10,7 +10,7 @@ using System.Reflection;
 
 using Main = ichortower.TowerCore.Main;
 
-namespace ichortower.CCC
+namespace ichortower.ECC
 {
     internal sealed class ModMain : Mod
     {
@@ -19,17 +19,17 @@ namespace ichortower.CCC
             Main.Mod = this;
 
             List<Type> types = new() {
-                typeof(ichortower.CCC.Actor),
-                typeof(ichortower.CCC.Stream),
-                typeof(ichortower.CCC.Viewport),
-                typeof(ichortower.CCC.World),
+                typeof(ichortower.ECC.Actor),
+                typeof(ichortower.ECC.Stream),
+                typeof(ichortower.ECC.Viewport),
+                typeof(ichortower.ECC.World),
             };
             types.ForEach(RegisterCommands);
             // TODO unhardcode this
             StardewValley.Event.RegisterCommandAlias($"{Main.ModId}_StreamBegin",
                     $"{Main.ModId}_StreamStart");
             TriggerActionManager.RegisterAction($"{Main.ModId}_WorldAdvanceTime",
-                    ichortower.CCC.World.traction_WorldAdvanceTime);
+                    ichortower.ECC.World.traction_WorldAdvanceTime);
         }
 
         private static void RegisterCommands(Type t)

@@ -10,7 +10,7 @@ using Log = ichortower.TowerCore.Log;
 using Main = ichortower.TowerCore.Main;
 using SEvent = StardewValley.Event;
 
-namespace ichortower.CCC;
+namespace ichortower.ECC;
 
 /*
  *
@@ -22,7 +22,7 @@ internal class Actor
 {
 
     /*
-     * ichortower.CCC_ActorAwaitMovement <actor> [actor... ]
+     * ichortower.ECC_ActorAwaitMovement <actor> [actor... ]
      *
      * This command blocks until all named event actors have completed their current
      * movements. This works a lot like vanilla's waitForAllStationary (all actors) and
@@ -72,7 +72,7 @@ internal class Actor
 
 
     /*
-     * ichortower.CCC_ActorHalt [next|waitnext] <actor> [actor... ]
+     * ichortower.ECC_ActorHalt [next|waitnext] <actor> [actor... ]
      *
      * This command stops the movement of all named actors, and removes any NPCControllers
      * that may have been puppeting them.
@@ -138,7 +138,7 @@ internal class Actor
 
 
     /*
-     * ichortower.CCC_ActorPathTo <actor> <x> <y> <facingDirection> [wait]
+     * ichortower.ECC_ActorPathTo <actor> <x> <y> <facingDirection> [wait]
      *
      * Tells an event actor to move to a specific tile coordinate, but relies on the
      * pathfinder to calculate a route instead of requiring you to type out the steps.

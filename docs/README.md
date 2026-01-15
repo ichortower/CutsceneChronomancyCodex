@@ -1,7 +1,8 @@
-# Cutscene Chronomancy Codex
+# Event Command Codex
 
-This Stardew Valley mod is a framework (of sorts) which is designed to unlock
-fabulous new time powers for mod authors to use when writing events. If you
+This Stardew Valley mod is a framework (of sorts) which adds a bunch of new
+event commands to the game. These are designed to give you new capabilities
+when writing events, particularly involving event flow and timing. If you
 have ever found yourself frustrated or confused by the flow of event scripts,
 or just by a single command that's difficult to use (\*cough\* `viewport`),
 then this mod may be for you.

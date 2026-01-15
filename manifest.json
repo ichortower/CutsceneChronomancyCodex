@@ -1,11 +1,11 @@
 {
-  "Name": "Cutscene Chronomancy Codex",
+  "Name": "Event Command Codex",
   "Author": "ichortower",
-  "Description": "Control time itself and give your events new and useful powers.",
+  "Description": "Give your events new and useful powers with new event commands.",
   "Version": "%ProjectVersion%",
-  "UniqueID": "ichortower.CCC",
-  "EntryDll": "CutsceneChronomancyCodex.dll",
+  "UniqueID": "ichortower.ECC",
+  "EntryDll": "EventCommandCodex.dll",
   "MinimumApiVersion": "4.1.0",
-  "UpdateKeys": ["Nexus:-1", "GitHub:ichortower/CutsceneChronomancyCodex"],
+  "UpdateKeys": ["Nexus:-1", "GitHub:ichortower/EventCommandCodex"],
   "Dependencies": []
 }

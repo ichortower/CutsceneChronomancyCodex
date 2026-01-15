@@ -8,7 +8,7 @@ using Log = ichortower.TowerCore.Log;
 using Main = ichortower.TowerCore.Main;
 using SEvent = StardewValley.Event;
 
-namespace ichortower.CCC;
+namespace ichortower.ECC;
 
 /*
  * 
@@ -24,7 +24,7 @@ internal class Viewport
 {
 
     /*
-     * ichortower.CCC_ViewportMove <x> <y> <time> [override] [wait]
+     * ichortower.ECC_ViewportMove <x> <y> <time> [override] [wait]
      *
      * Each of x and y can be an unadorned integer, in which case it represents
      * a tile delta (similar to `move`, except both axes can be nonzero at
@@ -83,7 +83,7 @@ internal class Viewport
 
 
     /*
-     * ichortower.CCC_ViewportStop
+     * ichortower.ECC_ViewportStop
      *
      * Aborts any ongoing viewport moves (those started by _ViewportMove, not the vanilla
      * viewport command) and empties the queue.
@@ -96,7 +96,7 @@ internal class Viewport
 
 
     /*
-     * ichortower.CCC_ViewportAwait
+     * ichortower.ECC_ViewportAwait
      *
      * Wait for all queued viewport moves (via _ViewportMove) to finish.
      */
