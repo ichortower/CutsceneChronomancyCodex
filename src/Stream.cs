@@ -267,7 +267,7 @@ internal class Streams
 
     internal static void StreamFunction(object sender, UpdateTickedEventArgs tickedArgs)
     {
-        if (!Game1.game1.IsActive) {
+        if (!ichortower.TowerCore.Game.IsActive()) {
             return;
         }
         if (Game1.eventOver || !Game1.eventUp) {

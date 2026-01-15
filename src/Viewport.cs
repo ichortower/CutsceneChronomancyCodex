@@ -161,7 +161,7 @@ internal class Viewport
     }
 
     private static void ViewportFunction(object sender, UpdateTickedEventArgs e) {
-        if (!Game1.game1.IsActive) {
+        if (!ichortower.TowerCore.Game.IsActive()) {
             return;
         }
         if (Game1.eventOver || !Game1.eventUp || viewportQueue.Count == 0) {
