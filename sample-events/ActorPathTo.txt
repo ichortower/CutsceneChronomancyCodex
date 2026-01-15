@@ -1,0 +1,38 @@
+Town
+continue
+41 60
+Abigail 40 59 1 Pierre 41 59 3
+--
+-- This event is intended to show you how to use ActorPathTo.
+--
+pause 1500
+speak Pierre "... and what's more, young lady...$3"
+emote Abigail 12
+speak Abigail "Ugh, not this again! You're so overbearing!$5#$b#I'm out of here.$3"
+speed Abigail 3
+move Abigail 0 1 2
+speed Abigail 3
+ichortower.ECC_ActorPathTo Abigail 46 72 2
+pause 250
+faceDirection Pierre 2 true
+emote Pierre 16
+pause 1000
+emote Pierre 40
+speak Pierre "*sigh* I suppose that was a bit harsh...$2#$b#Well, she'll cool down. I'd better mind the store.$2"
+--
+ichortower.ECC_StreamStart pierreaway
+ichortower.ECC_ActorPathTo Pierre 43 57 0 wait
+warp Pierre -1000 -1000 true
+playSound doorClose
+ichortower.ECC_StreamEnd
+--
+ichortower.ECC_ViewportMove a46 a73 5000
+pause 3000
+-- this await shouldn't actually block, but it will guarantee she's arrived
+ichortower.ECC_ActorAwaitMovement Abigail
+showFrame Abigail 26
+emote Abigail 28
+speak Abigail "... What's with him, anyway?$2"
+pause 1000
+ichortower.ECC_ViewportAwait
+end
