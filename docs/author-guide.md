@@ -246,6 +246,56 @@ But if you are already awaiting the movement in another stream, `next` will
 suffice.
 
 
+## Viewport Control
+
+These commands are intended to replace `viewport move` with a version that I
+find more sensible: it uses tile units instead of pixels per frame, and you
+can queue movements as well as wait for them to complete.
+
+The other forms of vanilla's `viewport` command should still serve; they work
+well.
+
+### `ViewportMove`
+
+`ichortower.CCC_ViewportMove <x> <y> <time> [override] [wait]`
+
+This command sets up a viewport movement.
+
+`x` and `y` are given in *map tiles*, and can be either relative to the current
+position or absolute on the map. To use relative values, just use plain
+integers (so e.g. `1 2` would mean to move the viewport 1 tile right and 2
+tiles down). For absolute ones, prepend the letter `a` (or `A`; it's
+case-insensitive), so e.g. `a14 a20` would mean to move the viewport to (14,20).
+You may mix and match these, so `a22 3` is valid and means to move to x 22 and
+y 3 tiles down from the current position.
+
+`time` is in milliseconds and determines how long the move will take to
+complete.
+
+By default, a viewport move will be queued behind any ongoing moves, and the
+command will not block. The optional arguments `override` and `wait` can be
+given to change this behavior: `override` will cause the existing queue to be
+emptied before starting this move, and `wait` will cause the command to block
+until the queue has been finished.
+
+**Note:** the movements set up by this command are totally separate from how
+vanilla's `viewport move` moves the viewport. Do not mix and match them.
+
+
+### `ViewportAwait`
+
+`ichortower.CCC_ViewportAwait`
+
+This command blocks until all queued viewport moves have completed.
+
+
+### `ViewportStop`
+
+`ichortower.CCC_ViewportStop`
+
+This command immediately halts and empties the viewport move queue.
+
+
 ## Vanilla Command Notes
 
 There are some vanilla commands which don't fully work with streams. The known
@@ -254,8 +304,8 @@ problems are documented here, so you can be aware of them.
 ### `speak`
 
 Due to unfortunate hardcoding in the DialogueBox class, this command can only
-be relied on to work in the main command list. Do not attempt to use it within a
-stream until further notice.
+be used in the main command list. Do not attempt to use it within a stream
+until further notice.
 
 ### `speed`
 
