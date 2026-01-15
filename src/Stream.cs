@@ -175,6 +175,7 @@ internal class Stream
             }
             target.CurrentCommand = 0;
             target.int_useMeForAnything = 0;
+            Streams.StartStreamRunner();
         }
         ++evt.CurrentCommand;
     }
@@ -227,6 +228,8 @@ internal class Streams
 
     internal static Dictionary<string, SEvent> OpenStreams = new();
 
+    internal static bool CleanupQueued = false;
+
     internal static bool New(SEvent source, string streamId, string[] commands)
     {
         if (OpenStreams.ContainsKey(streamId) &&
@@ -235,8 +238,6 @@ internal class Streams
         }
         SEvent stream = new();
         stream.id = $"{Main.ModId}_stream_{streamId}";
-        // necessary to allow Update() to work without trying to Initialize()
-        //stream.eventSwitched = true;
         stream.ReplaceAllCommands(commands);
         // actors and farmerActors should be ref copies in the new event
         stream.actors = source.actors;
@@ -247,6 +248,10 @@ internal class Streams
 
         OpenStreams[streamId] = stream;
         StartStreamRunner();
+        if (!CleanupQueued) {
+            source.onEventFinished += CleanUp;
+            CleanupQueued = true;
+        }
         return true;
     }
 
@@ -266,6 +271,7 @@ internal class Streams
             StopStreamRunner();
             return;
         }
+        bool alive = false;
         foreach (var kvp in OpenStreams) {
             SEvent e = kvp.Value;
             if (e.int_useMeForAnything == StreamEnded) {
@@ -275,6 +281,7 @@ internal class Streams
                 e.int_useMeForAnything = StreamEnded;
                 continue;
             }
+            alive = true;
 
             bool simul = false;
             do {
@@ -286,6 +293,9 @@ internal class Streams
                 }
             } while(simul);
         }
+        if (!alive) {
+            StopStreamRunner();
+        }
     }
 
     internal static void StopStreamRunner()
@@ -295,8 +305,15 @@ internal class Streams
         }
         Log.Debug("Stopping stream runner");
         Main.Helper.Events.GameLoop.UpdateTicked -= streamRunner;
-        OpenStreams.Clear();
         streamRunner = null;
+    }
+
+    internal static void CleanUp()
+    {
+        Log.Debug("Running cleanup function");
+        streamRunner = null;
+        OpenStreams.Clear();
+        CleanupQueued = false;
     }
 
     internal static bool HasControllerFor(Character actor)
