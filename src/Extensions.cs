@@ -89,10 +89,16 @@ public static class Extensions
 
     internal static void UpdateControllers(this SEvent evt, GameLocation location, GameTime time)
     {
+        // use stream's farmerAddedSpeed instead of the global one on main
+        int saved = Game1.CurrentEvent.farmerAddedSpeed;
+        Game1.CurrentEvent.farmerAddedSpeed = evt.farmerAddedSpeed;
+
         evt.npcControllers?.RemoveWhere((c) => {
             c.puppet.isCharging = !evt.isFestival;
             return c.update(time, location, evt.npcControllers);
-       });
+        });
+
+        Game1.CurrentEvent.farmerAddedSpeed = saved;
     }
 
     internal static void UpdateVanillaViewport(this SEvent evt, GameLocation location, GameTime time)
@@ -146,6 +152,11 @@ public static class Extensions
         if (apam.Count == 0) {
             return true;
         }
+
+        // use stream's farmerAddedSpeed instead of the global one on main
+        int saved = Game1.CurrentEvent.farmerAddedSpeed;
+        Game1.CurrentEvent.farmerAddedSpeed = evt.farmerAddedSpeed;
+
         foreach (string s in apam.Keys.ToArray()) {
             Rectangle targetTile = new((int)apam[s].X * 64, (int)apam[s].Y * 64, 64, 64);
             targetTile.Inflate(-4, 0);
@@ -206,21 +217,22 @@ public static class Extensions
                 break;
             }
         }
+
         if (apam.Count == 0) {
             if (evt.continueAfterMove) {
-                Log.Debug("oops");
                 evt.continueAfterMove = false;
             }
             else {
-                Log.Debug("advance command");
                 ++evt.CurrentCommand;
             }
         }
+        Game1.CurrentEvent.farmerAddedSpeed = saved;
         if (!evt.continueAfterMove) {
             return false;
         }
         return true;
     }
+
 
     internal static FieldInfo EventAPAM {
         get {
