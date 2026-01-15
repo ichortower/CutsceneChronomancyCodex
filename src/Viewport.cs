@@ -24,7 +24,7 @@ internal class Viewport
 {
 
     /*
-     * ichortower.CCC_ViewportMove <x> <y> <time> [queue] [wait]
+     * ichortower.CCC_ViewportMove <x> <y> <time> [override] [wait]
      *
      * Each of x and y can be an unadorned integer, in which case it represents
      * a tile delta (similar to `move`, except both axes can be nonzero at
@@ -33,8 +33,8 @@ internal class Viewport
      *
      * time is in milliseconds and specifies how long the move should take.
      *
-     * If the optional argument 'queue' is found, queue the move instead of
-     * starting immediately.
+     * By default, the move is queued. If the optional argument 'override' is
+     * found, empty the queue before starting this one.
      *
      * If the optional argument 'wait' is found, wait for the viewport queue to
      * finish and become empty before continuing the event.
@@ -45,7 +45,7 @@ internal class Viewport
             context.LogErrorAndSkip("requires at least three arguments (x y time)");
             return;
         }
-        bool queueMode = false;
+        bool queueMode = true;
         string err = "";
         if (!TryGetTarget(args[1], out int xDest, out ViewportMoveType xType, out err)) {
             context.LogErrorAndSkip($"failed to parse x coordinate: {err}");
@@ -60,8 +60,8 @@ internal class Viewport
             return;
         }
         for (int i = 4; i < args.Length; ++i) {
-            if (args[i].EqualsIgnoreCase("queue")) {
-                queueMode = true;
+            if (args[i].EqualsIgnoreCase("override")) {
+                queueMode = false;
             }
             else if (args[i].EqualsIgnoreCase("wait")) {
                 evt.InsertNextCommand($"{Main.ModId}_ViewportAwait");
@@ -72,7 +72,8 @@ internal class Viewport
             }
         }
         if (!queueMode) {
-            viewportQueue.Clear();
+            // this also clears the queue
+            StopViewportWatcher();
         }
         viewportQueue.Add(new ViewportMove(xDest, xType, yDest, yType,
                 duration, evt.CurrentCommand));
@@ -89,7 +90,6 @@ internal class Viewport
      */
     public static void command_ViewportStop(Event evt, string[] args, EventContext context)
     {
-        viewportQueue.Clear();
         StopViewportWatcher();
         ++evt.CurrentCommand;
     }
@@ -199,11 +199,11 @@ internal class Viewport
 
     private static void StopViewportWatcher()
     {
+        viewportQueue.Clear();
         if (viewportWatcher is null) {
             return;
         }
         Log.Debug("Stopping viewport watcher");
-        viewportQueue.Clear();
         ichortower.TowerCore.Main.Helper.Events.GameLoop.UpdateTicked -= viewportWatcher;
         viewportWatcher = null;
     }
