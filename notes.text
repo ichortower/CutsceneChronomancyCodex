@@ -5,7 +5,7 @@ playerControl
 CG without map jank
 ambientLight time/fade control
 
-[ ] fix streams running when game not focused/updating
+[ ] add streamhold and streamsignal
 [ ] fix speak in streams god damn it
 
 

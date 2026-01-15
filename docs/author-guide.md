@@ -362,11 +362,22 @@ would specify in e.g. a Content Patcher pack).
 There are some vanilla commands which don't fully work with streams. The known
 problems are documented here, so you can be aware of them.
 
+### `pause`
+
+This command uses a global field (`Game1.pauseTime`) which is hardcoded to
+advance the main command list when it expires, so it cannot be used in any
+other stream. Use `precisePause` or `StreamPause` instead.
+
+### `quickQuestion`
+
+In order to execute the scripts, this command injects them hardcodedly into
+the main command list, so I would not try using it in a stream if I were you.
+
 ### `speak`
 
-Due to unfortunate hardcoding in the DialogueBox class, this command can only
-be used in the main command list. Do not attempt to use it within a stream
-until further notice.
+To proceed, this command relies on the `DialogueBox` class, which is hardcoded
+to advance the main command list when it closes. As a result, this command
+cannot be used in any other stream. There is no replacement at this time.
 
 ### `speed`
 
