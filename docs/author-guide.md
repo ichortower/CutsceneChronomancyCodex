@@ -19,7 +19,13 @@ This document explains how to use the event commands added by this mod.
   * [ActorAwaitMovement](#actorawaitmovement)
   * [ActorHalt](#actorhalt)
 * [Viewport Control](#viewport-control)
+  * [ViewportMove](#viewportmove)
+  * [ViewportAwait](#viewportawait)
+  * [ViewportStop](#viewportstop)
 * [World Control](#world-control)
+  * [WorldAdvanceTime](#worldadvancetime)
+  * [TemporaryMapTiles](#temporarymaptiles)
+  * [TemporaryMapOverride](#temporarymapoverride)
 * [Vanilla Command Notes](#vanilla-command-notes)
 
 
@@ -294,6 +300,61 @@ This command blocks until all queued viewport moves have completed.
 `ichortower.CCC_ViewportStop`
 
 This command immediately halts and empties the viewport move queue.
+
+
+## World Control
+
+
+### `WorldAdvanceTime`
+
+`ichortower.CCC_WorldAdvanceTime <hhmm>`
+
+This command causes world time to pass when the event finishes. In addition to
+advancing the game clock, machines are given processing time and all NPCs are
+automatically advanced along their daily schedules to be ready for their next
+move (spouses with no schedule will be warped to bed if the target time is
+after 2200).
+
+Give the time as an integer between 600 and 2600, but it must be after the
+current game time or you will get an error.
+
+In multiplayer, this command has no effect: events don't freeze time in
+multiplayer, so time will pass just by watching it.
+
+**Note:** the machine processing and NPC advancing will happen immediately when
+this command executes, but the time change will be delayed until the event
+actually ends.
+
+**Note:** If possible, you should find a way to warn players ahead of time
+that you plan to use this command, and ideally give them a chance to avoid it.
+They are likely accustomed to events taking no time, and may have plans for
+their day which you may ruin if you surprise them with this.
+
+
+### `TemporaryMapTiles`
+
+`ichortower.CCC_TemporaryMapTiles (<layer> <x> <y> <sheet> <index>)+`
+
+This command temporarily replaces map tiles on the current map, reverting them
+to their previous state (by reloading the map) when the event ends.
+
+Use layer, x, and y to specify what tile to change. Sheet and index are to
+tell what to change that tile to. To remove a tile, use `-1` for index; in this
+case, sheet will be ignored, so you can pass something meaningless like `-`.
+
+
+### `TemporaryMapOverride`
+
+`ichortower.CCC_TemporaryMapOverride (<asset> <x> <y>)+`
+
+This command temporarily applies one or more map overrides to the current
+location. The overrides will be removed (and the map reloaded) when the event
+ends.
+
+The asset name is expected to be under `Maps/`, so to apply the map asset at
+`Maps/foo/bar`, you should specify just `foo/bar`. The x and y values are map
+tile coordinates of where to overlay it (the top-left corner, just like you
+would specify in e.g. a Content Patcher pack).
 
 
 ## Vanilla Command Notes
