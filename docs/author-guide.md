@@ -7,9 +7,20 @@ This document explains how to use the event commands added by this mod.
 
 * [General Notes](#general-notes)
 * [Stream Control](#stream-control)
+  * [StreamStart](#streamstart)
+  * [StreamEnd](#streamend)
+  * [StreamAwait](#streamawait)
+  * [StreamPause](#streampause)
+  * [StreamHalt](#streamhalt)
+  * [StreamRestart](#streamrestart)
+  * [StreamLoop](#streamloop)
 * [Actor Control](#actor-control)
+  * [ActorPathTo](#actorpathto)
+  * [ActorAwaitMovement](#actorawaitmovement)
+  * [ActorHalt](#actorhalt)
 * [Viewport Control](#viewport-control)
 * [World Control](#world-control)
+* [Vanilla Command Notes](#vanilla-command-notes)
 
 
 ## General Notes
@@ -36,9 +47,9 @@ Here are a few terms and things to know to help you read this document.
 "Streams" are the headline feature of the Codex. They allow you to implement
 parallel execution of multiple command lists, giving you a lot more control
 over timing than a single command list with only limited support for
-simultaneous commands. At its most basic, this allows you to make *any
-commands*, even blocking ones, run in parallel or wait for each other without
-messing up your main event flow.
+simultaneous commands. At its most basic, this allows you to run almost any
+commands simultaneously, although there are some perhaps-unintuitive
+restrictions (see [Vanilla Command Notes](#vanilla-command-notes) for details).
 
 The quick overview is that you declare a stream and give it a list of commands.
 At that time, the stream begins executing, but does not block the main command
@@ -233,3 +244,22 @@ Likewise, in general I advise using `waitnext` over `next`, since some moves
 may not halt correctly without `ActorAwaitMovement` to help unstick them.
 But if you are already awaiting the movement in another stream, `next` will
 suffice.
+
+
+## Vanilla Command Notes
+
+There are some vanilla commands which don't fully work with streams. The known
+problems are documented here, so you can be aware of them.
+
+### `speak`
+
+Due to unfortunate hardcoding in the DialogueBox class, this command can only
+be relied on to work in the main command list. Do not attempt to use it within a
+stream until further notice.
+
+### `speed`
+
+When used with NPC actors, this command behaves as expected in any stream.
+When used with a farmer, the speed change is local to the stream, and movements
+in other streams will not see the value.
+

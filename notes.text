@@ -5,10 +5,8 @@ playerControl
 CG without map jank
 ambientLight time/fade control
 
-[ ] clear streams when event ends
-[ ] clear any other static goo that might stick around
-[ ] auto-remove stream runner when no active streams
 [ ] fix streams running when game not focused/updating
+[ ] fix speak in streams god damn it
 
 
 event commands with side effects that should be neutralized when isMemory:
