@@ -1,12 +1,10 @@
+[ ] ambientLight time/fade control
+
 look into:
 rewind/replay/hot reload
 leoMemory? (see below)
 playerControl
 CG without map jank
-ambientLight time/fade control
-
-[ ] add streamhold and streamsignal
-[ ] fix speak in streams god damn it
 
 
 event commands with side effects that should be neutralized when isMemory:

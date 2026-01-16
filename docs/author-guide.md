@@ -344,6 +344,10 @@ that you plan to use this command, and ideally give them a chance to avoid it.
 They are likely accustomed to events taking no time, and may have plans for
 their day which you may ruin if you surprise them with this.
 
+This command is also available as a trigger action, using the same name, and
+should work anywhere actions are accepted (except in multiplayer, as above).
+When triggered outside of an event, the time change will be immediate.
+
 
 ### `TemporaryMapTiles`
 

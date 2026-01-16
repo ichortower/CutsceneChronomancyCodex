@@ -81,7 +81,7 @@ public static class Extensions
         if (evt.isFestival) {
             evt.festivalUpdate(time);
         }
-        // TODO more reflection fuck me
+        // TODO more reflection
         //if (evt.temporaryLocation is not null && !Game1.currentLocation.Equals(evt.temporaryLocation)) {
             //evt.temporaryLocation.updateEvenIfFarmerIsntHere(time, ignoreWasUpdatedFlush: true);
         //}
