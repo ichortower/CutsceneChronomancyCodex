@@ -75,20 +75,19 @@ internal class Viewport
             // this also clears the queue
             StopViewportWatcher();
         }
-        viewportQueue.Add(new ViewportMove(xDest, xType, yDest, yType,
-                duration, evt.CurrentCommand));
+        viewportQueue.Add(new ViewportMove(xDest, xType, yDest, yType, duration));
         StartViewportWatcher();
         ++evt.CurrentCommand;
     }
 
 
     /*
-     * ichortower.ECC_ViewportStop
+     * ichortower.ECC_ViewportHalt
      *
      * Aborts any ongoing viewport moves (those started by _ViewportMove, not the vanilla
      * viewport command) and empties the queue.
      */
-    public static void command_ViewportStop(Event evt, string[] args, EventContext context)
+    public static void command_ViewportHalt(Event evt, string[] args, EventContext context)
     {
         StopViewportWatcher();
         ++evt.CurrentCommand;
@@ -138,12 +137,6 @@ internal class Viewport
         }
         err = null;
         return true;
-    }
-
-    private static bool IsThisIndexLast(int index)
-    {
-        return viewportQueue.Count > 0 &&
-                viewportQueue[viewportQueue.Count-1].Index == index;
     }
 
     private static System.EventHandler<UpdateTickedEventArgs> viewportWatcher = null;
@@ -223,17 +216,15 @@ internal class ViewportMove
     public ViewportMoveType TypeY = ViewportMoveType.None;
     public int Duration = 0;
     public int StartMs = 0;
-    public int Index = 0;
 
     public ViewportMove(int endx, ViewportMoveType typex,
-            int endy, ViewportMoveType typey, int duration, int index)
+            int endy, ViewportMoveType typey, int duration)
     {
         EndX = endx;
         EndY = endy;
         TypeX = typex;
         TypeY = typey;
         Duration = duration;
-        Index = index;
     }
 }
 
