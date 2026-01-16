@@ -17,6 +17,7 @@ This document explains how to use the event commands added by this mod.
 * [Actor Control](#actor-control)
   * [ActorPathTo](#actorpathto)
   * [ActorAwaitMovement](#actorawaitmovement)
+  * [ActorAwaitAnimation](#actorawaitanimation)
   * [ActorHalt](#actorhalt)
 * [Viewport Control](#viewport-control)
   * [ViewportMove](#viewportmove)
@@ -227,12 +228,25 @@ a looping `advancedMove` will block forever, so do not do this without a plan to
 call `ActorHalt` from some other stream.
 
 
+### `ActorAwaitAnimation`
+
+`ichortower.ECC_ActorAwaitAnimation <actor> [actor...]`
+
+This command is just like `ActorAwaitMovement`, except instead of blocking to
+wait for movement to finish, it waits for animations. This accounts for sprite
+animations using the `animate` command, as well as `emote`.
+
+Note that just like `ActorAwaitMovement`, this will block forever if it is
+awaiting a looping animation, so be careful not to do that without a way to
+use `ActorHalt`.
+
+
 ### `ActorHalt`
 
 `ichortower.ECC_ActorHalt [next|waitnext] <actor> [actor...]`
 
-This command stops the movement of all named actors, and removes any
-NPCControllers that may have been puppeting them.
+This command stops the movement and animation of all named actors, and removes
+any NPCControllers that may have been puppeting them.
 
 The first argument is optional and can be one of two special strings in order
 to change the behavior (both case-insensitive):
@@ -361,6 +375,12 @@ would specify in e.g. a Content Patcher pack).
 
 There are some vanilla commands which don't fully work with streams. The known
 problems are documented here, so you can be aware of them.
+
+### `emote`
+
+When not passing the optional `true` to avoid blocking, this is hardcoded to
+advance the main command list when the emote expires. In a stream, you should
+always use the optional `true` and then `StreamPause` if you need to block.
 
 ### `pause`
 

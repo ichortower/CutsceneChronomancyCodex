@@ -72,6 +72,41 @@ internal class Actor
 
 
     /*
+     * ichortower.ECC_ActorAwaitAnimation <actor> [actor... ]
+     *
+     * Similar to ActorAwaitMovement, except it blocks until the actors finish their animations
+     * (which includes `animate` as well as `emote`).
+     */
+    public static void command_ActorAwaitAnimation(SEvent evt, string[] args, EventContext context)
+    {
+        if (args.Length < 2) {
+            context.LogErrorAndSkip("requires at least one actor argument");
+            return;
+        }
+        bool wait = false;
+        for (int i = 1; i < args.Length; ++i) {
+            string actorName = args[i];
+            Character actor = evt.getCharacterByName(actorName);
+            if (actor is null) {
+                context.LogErrorAndSkip($"no actor found with name '{actorName}'");
+                return;
+            }
+            if (actor.IsEmoting ||
+                    (actor is Farmer f && f.FarmerSprite?.CurrentAnimation is not null) ||
+                    (actor is NPC n && n.Sprite?.CurrentAnimation is not null)) {
+                wait = true;
+                break;
+            }
+        }
+        if (!wait) {
+            ++evt.CurrentCommand;
+        }
+
+    }
+
+
+
+    /*
      * ichortower.ECC_ActorHalt [next|waitnext] <actor> [actor... ]
      *
      * This command stops the movement of all named actors, and removes any NPCControllers
