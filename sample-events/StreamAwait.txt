@@ -1,0 +1,56 @@
+Town
+continue
+67 25
+farmer -1000 -1000 2 Demetrius 67 22 2 Jodi 66 24 0 Sam 68 24 0
+--
+-- This event demonstrates stream looping, awaiting, and halting.
+--
+pause 2000
+--
+ichortower.ECC_StreamStart jodibored
+ichortower.ECC_StreamPause 2820 2110 2660
+emote Jodi 40 true
+ichortower.ECC_StreamPause 4820 4110 4660
+emote Jodi 40 true
+ichortower.ECC_StreamPause 4820 4110 4660
+ichortower.ECC_StreamEnd
+--
+ichortower.ECC_StreamStart sambored
+ichortower.ECC_StreamPause 3070 3480 3940
+emote Sam 40 true
+ichortower.ECC_StreamPause 4070 4480 4940
+emote Sam 40 true
+ichortower.ECC_StreamPause 4070 4480 4940
+ichortower.ECC_StreamEnd
+--
+ichortower.ECC_StreamStart bothsleep
+ichortower.ECC_StreamAwait jodibored sambored
+emote Jodi 24 true
+ichortower.ECC_StreamPause 800 1200 1800
+emote Sam 24 true
+ichortower.ECC_StreamPause 1500 2000 2500
+ichortower.ECC_StreamLoop
+ichortower.ECC_StreamEnd
+--
+speak Demetrius "Line 1 of boring geology lecture"
+move Demetrius 1 0 1
+speak Demetrius "Line 2 of boring geology lecture#$b#Line 2a of boring geology lecture"
+faceDirection Demetrius 2
+emote Demetrius 32
+move Demetrius -1 0 2
+speak Demetrius "Line 3 of boring geology lecture"
+ichortower.ECC_StreamAwait jodibored sambored
+pause 1000
+emote Demetrius 40
+ichortower.ECC_ActorAwaitAnimation Jodi Sam
+emote Demetrius 16 true
+jump Demetrius
+ichortower.ECC_StreamHalt bothsleep
+pause 200
+emote Jodi 16 true
+emote Sam 16
+speak Demetrius "Please try to pay attention while I'm lecturing!$4"
+emote Jodi 28 true
+pause 220
+emote Sam 28
+end

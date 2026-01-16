@@ -1,7 +1,7 @@
 Town
 continue
 41 60
-Abigail 40 59 1 Pierre 41 59 3
+farmer -1000 -1000 2 Abigail 40 59 1 Pierre 41 59 3
 --
 -- This event is intended to show you how to use ActorPathTo.
 --
@@ -20,6 +20,8 @@ pause 1000
 emote Pierre 40
 speak Pierre "*sigh* I suppose that was a bit harsh...$2#$b#Well, she'll cool down. I'd better mind the store.$2"
 --
+-- this stream warps pierre away when he reaches the door
+--
 ichortower.ECC_StreamStart pierreaway
 ichortower.ECC_ActorPathTo Pierre 43 57 0 wait
 warp Pierre -1000 -1000 true
@@ -34,5 +36,4 @@ showFrame Abigail 26
 emote Abigail 28
 speak Abigail "... What's with him, anyway?$2"
 pause 1000
-ichortower.ECC_ViewportAwait
 end
