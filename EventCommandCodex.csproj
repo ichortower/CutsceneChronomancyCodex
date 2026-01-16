@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Version>0.6.0-beta</Version>
+        <Version>0.7.0-beta</Version>
         <TargetFramework>net6.0</TargetFramework>
 
         <ModFolderName>$(MOD_NAME)</ModFolderName>

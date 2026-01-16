@@ -20,6 +20,7 @@ namespace ichortower.ECC
 
             List<Type> types = new() {
                 typeof(ichortower.ECC.Actor),
+                typeof(ichortower.ECC.AmbientLight),
                 typeof(ichortower.ECC.Stream),
                 typeof(ichortower.ECC.Viewport),
                 typeof(ichortower.ECC.World),

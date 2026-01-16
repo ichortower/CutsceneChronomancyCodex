@@ -22,7 +22,11 @@ This document explains how to use the event commands added by this mod.
 * [Viewport Control](#viewport-control)
   * [ViewportMove](#viewportmove)
   * [ViewportAwait](#viewportawait)
-  * [ViewportStop](#viewportstop)
+  * [ViewportHalt](#viewporthalt)
+* [Ambient Light Control](#ambient-light-control)
+  * [AmbientLightShift](#ambientlightshift)
+  * [AmbientLightAwait](#ambientlightawait)
+  * [AmbientLightHalt](#ambientlighthalt)
 * [World Control](#world-control)
   * [WorldAdvanceTime](#worldadvancetime)
   * [TemporaryMapTiles](#temporarymaptiles)
@@ -277,7 +281,7 @@ well.
 
 ### `ViewportMove`
 
-`ichortower.ECC_ViewportMove <x> <y> <time> [override] [wait]`
+`ichortower.ECC_ViewportMove <x> <y> <duration> [override] [wait]`
 
 This command sets up a viewport movement.
 
@@ -289,7 +293,7 @@ case-insensitive), so e.g. `a14 a20` would mean to move the viewport to (14,20).
 You may mix and match these, so `a22 3` is valid and means to move to x 22 and
 y 3 tiles down from the current position.
 
-`time` is in milliseconds and determines how long the move will take to
+`duration` is in milliseconds and determines how long the move will take to
 complete.
 
 By default, a viewport move will be queued behind any ongoing moves, and the
@@ -309,11 +313,61 @@ vanilla's `viewport move` moves the viewport. Do not mix and match them.
 This command blocks until all queued viewport moves have completed.
 
 
-### `ViewportStop`
+### `ViewportHalt`
 
-`ichortower.ECC_ViewportStop`
+`ichortower.ECC_ViewportHalt`
 
-This command immediately halts and empties the viewport move queue.
+This command immediately halts any ongoing viewport moves and empties the
+viewport move queue.
+
+
+## Ambient Light Control
+
+Although vanilla has the `ambientLight` command which lets you set the ambient
+light color and intensity at any time, it is merely immediate and there is no
+way to transition smoothly. These commands give you the ability to fade it
+gradually and queue the operations, just like with the viewport control
+commands; you can use this to help simulate things like sunsets.
+
+
+### `AmbientLightShift`
+
+`ichortower.ECC_AmbientLightShift <red> <green> <blue> <duration> [override] [wait]`
+
+This command sets up a gradual ambient light shift.
+
+`red`, `green`, and `blue` should be integers from 0 to 255, representing the
+RGB values of the color that will be **subtracted** from white to generate the
+game tint, just as it is with vanilla's `ambientLight` command.
+
+**Note:** The game's draw code has a special case for when all three values of
+the ambient light color are 255 (which would normally mean full darkness): this
+is treated as full brightness instead, the same as `0 0 0`. I recommend
+avoiding this value, and using `254 254 254` instead if you need pitch black;
+it's close enough and won't cause flashing in and out of darkness.
+
+`duration` is in milliseconds and determines how long the shift will take to
+complete.
+
+Like with `ViewportMove`, by default, the shift will be queued behind any
+ongoing shifts, and the command will not block. Just like that command, you can
+give the optional argument `override` to first empty the queue before starting,
+and you can give the optional argument `wait` to block until the queue empties.
+
+
+### `AmbientLightAwait`
+
+`ichortower.ECC_AmbientLightAwait`
+
+This command blocks until all queued ambient light shifts have completed.
+
+
+### `AmbientLightHalt`
+
+`ichortower.ECC_AmbientLightHalt`
+
+This command immediately halts all ongoing ambient light shifts and empties
+the light shift queue.
 
 
 ## World Control

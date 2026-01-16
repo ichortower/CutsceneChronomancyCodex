@@ -41,22 +41,12 @@ internal class Viewport
      */
     public static void command_ViewportMove(Event evt, string[] args, EventContext context)
     {
-        if (args.Length < 4) {
-            context.LogErrorAndSkip("requires at least three arguments (x y time)");
-            return;
-        }
         bool queueMode = true;
         string err = "";
-        if (!TryGetTarget(args[1], out int xDest, out ViewportMoveType xType, out err)) {
-            context.LogErrorAndSkip($"failed to parse x coordinate: {err}");
-            return;
-        }
-        if (!TryGetTarget(args[2], out int yDest, out ViewportMoveType yType, out err)) {
-            context.LogErrorAndSkip($"failed to parse y coordinate: {err}");
-            return;
-        }
-        if (!int.TryParse(args[3], out int duration)) {
-            context.LogErrorAndSkip($"failed to parse duration from '{args[3]}'");
+        if (!TryGetTarget(args[1], out int xDest, out ViewportMoveType xType, out err) ||
+                !TryGetTarget(args[2], out int yDest, out ViewportMoveType yType, out err) ||
+                !ArgUtility.TryGetInt(args, 3, out int duration, out err, "int duration")) {
+            context.LogErrorAndSkip(err);
             return;
         }
         for (int i = 4; i < args.Length; ++i) {
@@ -187,10 +177,9 @@ internal class Viewport
             return;
         }
         // FIXME also do the raindrop position adjustment
-        Game1.viewport.X = (int)Utility.Lerp((float)head.StartX, (float)head.EndX,
-                (float)(now - head.StartMs) / (float)head.Duration);
-        Game1.viewport.Y = (int)Utility.Lerp((float)head.StartY, (float)head.EndY,
-                (float)(now - head.StartMs) / (float)head.Duration);
+        float t = (float)(now - head.StartMs) / (float)head.Duration;
+        Game1.viewport.X = (int)Utility.Lerp((float)head.StartX, (float)head.EndX, t);
+        Game1.viewport.Y = (int)Utility.Lerp((float)head.StartY, (float)head.EndY, t);
     }
 
     private static void StopViewportWatcher()
