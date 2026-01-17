@@ -109,7 +109,7 @@ internal class Viewport
     {
         target = 0;
         type = ViewportMoveType.None;
-        if (arg.StartsWith("a") || arg.StartsWith("A")) {
+        if (arg.StartsWith("a", StringComparison.OrdinalIgnoreCase)) {
             if (!int.TryParse(arg.Substring(1), out int avalue)) {
                 err = $"'{arg}': integer not found following 'a'";
                 return false;

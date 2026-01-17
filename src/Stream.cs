@@ -43,10 +43,12 @@ internal class Stream
         int i = evt.CurrentCommand + 1;
         List<string> commands = new();
         for (; i < evt.eventCommands.Length; ++i) {
-            if (evt.eventCommands[i].StartsWith($"{Main.ModId}_StreamStart")) {
+            if (evt.eventCommands[i].StartsWith($"{Main.ModId}_StreamStart",
+                    StringComparison.OrdinalIgnoreCase)) {
                 ++depth;
             }
-            if (evt.eventCommands[i].StartsWith($"{Main.ModId}_StreamEnd")) {
+            if (evt.eventCommands[i].StartsWith($"{Main.ModId}_StreamEnd",
+                    StringComparison.OrdinalIgnoreCase)) {
                 --depth;
                 if (depth <= 0) {
                     matched = true;
