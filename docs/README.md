@@ -14,8 +14,10 @@ Here are some of the things you can do with these commands:
 * Tell an actor to go to a specific tile without having to write up the path
     instructions yourself, or even know what tile they are standing on
 * Control the viewport with reasonable units and queueing
+* Control the scene's ambient light over time with fading and queueing
 * Set up parallel command lists that run without blocking the event loop
 * Loop, stop, restart, and/or wait for parallel lists to finish executing
+* Execute blocks of commands conditionally with If/ElseIf/Else/EndIf
 * Cause an event to "take time" by advancing the world time when it completes
     (correctly processing machines and advancing NPCs along their schedules)
 * Make temporary map tile changes or apply map overrides that last only until
