@@ -31,8 +31,8 @@ This document explains how to use the event commands added by this mod.
   * [WorldAdvanceTime](#worldadvancetime)
   * [TemporaryMapTiles](#temporarymaptiles)
   * [TemporaryMapOverride](#temporarymapoverride)
-* [Conditional Execution)(#conditional-execution)
-  * [If/ElseIf/Else/EndIf](#if-elseif-else-endif)
+* [Conditional Execution](#conditional-execution)
+  * [If/ElseIf/Else/EndIf](#ifelseifelseendif)
 * [Vanilla Command Notes](#vanilla-command-notes)
 
 
