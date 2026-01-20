@@ -2,6 +2,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Extensions;
+using System;
 using System.Collections.Generic;
 
 using Log = ichortower.TowerCore.Log;
@@ -39,7 +40,7 @@ internal class Viewport
      * If the optional argument 'wait' is found, wait for the viewport queue to
      * finish and become empty before continuing the event.
      */
-    public static void command_ViewportMove(Event evt, string[] args, EventContext context)
+    public static void command_ViewportMove(SEvent evt, string[] args, EventContext context)
     {
         bool queueMode = true;
         string err = "";
@@ -77,7 +78,7 @@ internal class Viewport
      * Aborts any ongoing viewport moves (those started by _ViewportMove, not the vanilla
      * viewport command) and empties the queue.
      */
-    public static void command_ViewportHalt(Event evt, string[] args, EventContext context)
+    public static void command_ViewportHalt(SEvent evt, string[] args, EventContext context)
     {
         StopViewportWatcher();
         ++evt.CurrentCommand;
@@ -89,8 +90,7 @@ internal class Viewport
      *
      * Wait for all queued viewport moves (via _ViewportMove) to finish.
      */
-    public static void command_ViewportAwait(Event evt, string[] args,
-            EventContext context)
+    public static void command_ViewportAwait(SEvent evt, string[] args, EventContext context)
     {
         if (viewportQueue.Count == 0) {
             ++evt.CurrentCommand;

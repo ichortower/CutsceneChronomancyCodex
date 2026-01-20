@@ -59,7 +59,7 @@ internal class Stream
         }
         evt.CurrentCommand = i;
         if (!matched) {
-            context.LogErrorAndSkip("did not find a matching _StreamEnd command");
+            context.LogErrorAndSkip("did not find a matching StreamEnd command");
             return;
         }
         if (!ArgUtility.TryGet(args, 1, out string streamId, out string error, allowBlank:false, "string id")) {
@@ -87,7 +87,7 @@ internal class Stream
     public static void command_StreamEnd(SEvent evt, string[] args, EventContext context)
     {
         context.LogErrorAndSkip("this command was executed, which shouldn't" +
-                " happen. Check your script and make sure every stream is ended once.");
+                " happen. Check your script and make sure every stream is ended once");
     }
 
 
@@ -102,7 +102,7 @@ internal class Stream
      * This works by picking a random value, then replacing itself with a
      * precisePause command using the chosen value.
      */
-    public static void command_StreamPause(Event evt, string[] args, EventContext context)
+    public static void command_StreamPause(SEvent evt, string[] args, EventContext context)
     {
         List<int> times = new();
         for (int i = 1; i < Math.Max(2, args.Length); ++i) {

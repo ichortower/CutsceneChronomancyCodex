@@ -21,7 +21,7 @@ namespace ichortower.ECC;
 internal class AmbientLight
 {
 
-    public static void command_AmbientLightShift(Event evt, string[] args, EventContext context)
+    public static void command_AmbientLightShift(SEvent evt, string[] args, EventContext context)
     {
         bool queueMode = true;
         string error;
@@ -53,14 +53,14 @@ internal class AmbientLight
         ++evt.CurrentCommand;
     }
 
-    public static void command_AmbientLightAwait(Event evt, string[] args, EventContext context)
+    public static void command_AmbientLightAwait(SEvent evt, string[] args, EventContext context)
     {
         if (ambientLightQueue.Count == 0) {
             ++evt.CurrentCommand;
         }
     }
 
-    public static void command_AmbientLightHalt(Event evt, string[] args, EventContext context)
+    public static void command_AmbientLightHalt(SEvent evt, string[] args, EventContext context)
     {
         StopAmbientLightWatcher();
         ++evt.CurrentCommand;
