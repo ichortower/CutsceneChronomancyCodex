@@ -31,6 +31,8 @@ This document explains how to use the event commands added by this mod.
   * [WorldAdvanceTime](#worldadvancetime)
   * [TemporaryMapTiles](#temporarymaptiles)
   * [TemporaryMapOverride](#temporarymapoverride)
+* [Conditional Execution)(#conditional-execution)
+  * [If/ElseIf/Else/EndIf](#if-elseif-else-endif)
 * [Vanilla Command Notes](#vanilla-command-notes)
 
 
@@ -45,11 +47,11 @@ Here are a few terms and things to know to help you read this document.
   the `.txt` file to your game directory, rename it `test_event.txt`, and
   run `debug rte` in your SMAPI console to run it directly. There is no need
   to patch reload or anything else; it will be read live.
-* When a command says that it "blocks" (or talks about another command
+* When a command says that it "blocks" (verb) (or talks about another command
   "blocking"), that means that it will pause at that point in the command
-  list and prevent the event from continuing until some condition is met.
+  list and prevent the stream from continuing until some condition is met.
   For example, `move <npc> 3 0 2` blocks, because the optional `true`
-  argument was not given, so the event will wait until the move completes
+  argument was not given, so the stream will wait until the move completes
   before running the next command.
 
 
@@ -427,6 +429,62 @@ The asset name is expected to be under `Maps/`, so to apply the map asset at
 `Maps/foo/bar`, you should specify just `foo/bar`. The x and y values are map
 tile coordinates of where to overlay it (the top-left corner, just like you
 would specify in e.g. a Content Patcher pack).
+
+
+## Conditional Execution
+
+
+### `If`/`ElseIf`/`Else`/`EndIf`
+
+`ichortower.ECC_If <Game state query>`\
+`ichortower.ECC_ElseIf <Game state query>`\
+`ichortower.ECC_Else`\
+`ichortower.ECC_EndIf`
+
+These commands define a set of conditional command blocks. Just like a
+conventional programming language, the conditions are checked in order, and as
+soon as one is satisfied, that block is executed and the others are discarded
+without even being evaluated.
+
+You can put any number of event commands between the control commands, e.g.:
+
+```
+ichortower.ECC_If PLAYER_NPC_RELATIONSHIP Current Abigail married
+emote Abigail 16
+speak Abigail "That's so rude! You're talking about my ${husband^wife^spouse}$!$a"
+emote Pierre 40
+ichortower.ECC_EndIf
+```
+
+In this example, the three commands (emote/speak/emote) are only executed if
+the player is married to Abigail. But you can add more blocks, too:
+
+```
+ichortower.ECC_If PLAYER_NPC_RELATIONSHIP Current Abigail married
+emote Abigail 16
+speak Abigail "That's so rude! You're talking about my ${husband^wife^spouse}$!$a"
+emote Pierre 40
+ichortower.ECC_ElseIf PLAYER_NPC_RELATIONSHIP Current Abigail dating
+emote Abigail 12
+speak Abigail "Hey! I happen to like that person quite a lot!$a"
+ichortower.ECC_Else
+speak Abigail "Who? Farmer @?$u"
+ichortower.ECC_EndIf
+```
+
+In this case, you'll get the first block (`If`..`ElseIf`) if married, the
+second block (`ElseIf`..`Else`) if dating, and the third block
+(`Else`..`EndIf`) for any other relationship.
+
+You can have as many `ElseIf` blocks as you like, but only one `Else`, and
+the `Else` must come last. Violations of this order will parse, but you will
+get a warning about the blocks not being reachable.
+
+You *should* be able to nest these commands, but I haven't tested that yet.
+
+**Note:** the game state queries that drive this are evaluated when the
+blocks are parsed for execution, so they are "real time" and may reflect
+changes to game state that have occurred earlier in the event.
 
 
 ## Vanilla Command Notes

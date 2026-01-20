@@ -142,7 +142,12 @@ internal class IfBlock
             else if (c.StartsWithIgnoreCase($"{Main.ModId}_Else")) {
                 if (depth == 1) {
                     StartBody(c);
-                    foundElse = true;
+                    if (foundElse) {
+                        Log.Warn("Found an Else after an Else, which will never execute");
+                    }
+                    else {
+                        foundElse = true;
+                    }
                 }
                 else {
                     AddCommand(c);
