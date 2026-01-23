@@ -81,10 +81,7 @@ public static class Extensions
         if (evt.isFestival) {
             evt.festivalUpdate(time);
         }
-        // TODO more reflection
-        //if (evt.temporaryLocation is not null && !Game1.currentLocation.Equals(evt.temporaryLocation)) {
-            //evt.temporaryLocation.updateEvenIfFarmerIsntHere(time, ignoreWasUpdatedFlush: true);
-        //}
+        // removed updating evt.temporaryLocation. i don't think it's needed outside main stream
     }
 
     internal static void UpdateControllers(this SEvent evt, GameLocation location, GameTime time)
