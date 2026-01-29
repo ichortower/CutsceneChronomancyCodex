@@ -1,10 +1,11 @@
-[ ] ambientLight time/fade control
 
 look into:
 rewind/replay/hot reload
 leoMemory? (see below)
 playerControl
 CG without map jank
+chu: can we get a way to define all event coords relatively
+    like if you start an event with a tile action, make all coords mentioned within relative to the tile of the action
 
 
 event commands with side effects that should be neutralized when isMemory:
