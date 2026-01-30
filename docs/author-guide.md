@@ -35,7 +35,7 @@ This document explains how to use the event commands added by this mod.
   * [If/ElseIf/Else/EndIf](#ifelseifelseendif)
 * [Event Variables](#event-variables)
   * [VarSet](#varset)
-  * [VAR_QUERY](#varquery)
+  * [VAR_QUERY](#var_query)
 * [Vanilla Command Notes](#vanilla-command-notes)
 
 
@@ -533,7 +533,11 @@ precedence order (so parentheses are highest, then exponent, and so on).
 </tr>
 
 <tr>
-<td>`' "`</td>
+<td>
+
+`' "`
+
+</td>
 <td>
 
 `'foobar'`
@@ -552,7 +556,11 @@ work properly, since they would end the JSON string otherwise.
 </tr>
 
 <tr>
-<td>`()`</td>
+<td>
+
+`()`
+
+</td>
 <td>
 
 `(1 + 2) * 3`
@@ -569,8 +577,16 @@ Without the parentheses, `2 * 3` evaluates first to `6`, then `1 + 6` becomes
 </tr>
 
 <tr>
-<td>`^`</td>
-<td>`myvar ^ 2`</td>
+<td>
+
+`^`
+
+</td>
+<td>
+
+`myvar ^ 2`
+
+</td>
 <td>
 
 The exponent operator will work only on integers and will not accept strings.
@@ -581,7 +597,11 @@ return the negative integer limit.
 </tr>
 
 <tr>
-<td>`* \`</td>
+<td>
+
+`* \`
+
+</td>
 <td>
 
 `myvar * 4`
@@ -607,7 +627,11 @@ portion of its result. `9 \ 2` yields `4`.
 </tr>
 
 <tr>
-<td>`+ -`</td>
+<td>
+
+`+ -`
+
+</td>
 <td>
 
 `myvar + 4`
@@ -629,7 +653,11 @@ be more explicit to avoid parse errors (e.g. `-1 * myvar` instead of `-myvar`).
 </tr>
 
 <tr>
-<td>`= !=`</td>
+<td>
+
+`= !=`
+
+</td>
 <td>
 
 `myvar = 4`
@@ -650,7 +678,11 @@ want. You're welcome.
 </tr>
 
 <tr>
-<td>`< <= > >=`</td>
+<td>
+
+`< <= > >=`
+
+</td>
 <td>
 
 `myvar < 5`
@@ -667,7 +699,11 @@ less-than/less-than-or-equal/greater-than/greater-than-or-equal, respectively.
 </tr>
 
 <tr>
-<td>`.`</td>
+<td>
+
+`.`
+
+</td>
 <td>
 
 `myvar . 'foobar'`
@@ -703,7 +739,7 @@ For example, you could use:
 
 ... to increment its current value. You can combine a lot of stuff:
 
-`ichortower.ECC_VarSet myvalue (1+anothervalue) * (12-5) . ' points'`
+`ichortower.ECC_VarSet myvalue (1+4) * (12-5) . ' points'`
 
 ... which does the math as you would expect (5 \* 7), then concatenates it
 with the text to generate the string "35 points".
