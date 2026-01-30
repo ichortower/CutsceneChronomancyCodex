@@ -33,6 +33,9 @@ This document explains how to use the event commands added by this mod.
   * [TemporaryMapOverride](#temporarymapoverride)
 * [Conditional Execution](#conditional-execution)
   * [If/ElseIf/Else/EndIf](#ifelseifelseendif)
+* [Event Variables](#event-variables)
+  * [VarSet](#varset)
+  * [VAR_QUERY](#varquery)
 * [Vanilla Command Notes](#vanilla-command-notes)
 
 
@@ -485,6 +488,241 @@ You *should* be able to nest these commands, but I haven't tested that yet.
 **Note:** the game state queries that drive this are evaluated when the
 blocks are parsed for execution, so they are "real time" and may reflect
 changes to game state that have occurred earlier in the event.
+
+
+## Event Variables
+
+This command and game state query are intended for use with the Conditional
+Execution blocks (see above). You can use them to store and manipulate integer
+or string values, then change your event's behavior accordingly.
+
+
+### `VarSet`
+
+`ichortower.ECC_VarSet <name> <value|expression>`
+
+This command sets a user-defined variable to the value or expression that
+follows it. You can use it to save a value for later, or to keep track of a
+running total, or other similar actions.
+
+When picking a variable name, there are a few restrictions:
+
+* it must be **alphanumeric only** ([a-zA-Z0-9])
+* it must contain at least one letter ([a-zA-Z])
+* it must not start with 'ECC' (case-insensitive; this is to prevent
+    collisions with planned future features)
+
+Other than those, you can choose whatever you like.
+
+The expression parsing and evaluation proceeds as you might expect, including
+operator precedence, but note that it supports only integers and strings (no
+floating-point numbers!): the `.` symbol is a low-priority concatenate operator
+and may cause confusing results if used by mistake.
+
+**Note**: every resulting value that this command generates is serialized to a
+string, including during the parsing and evaluation steps. You might not need
+to know this, but if something weird happens, maybe that will help you figure
+it out.
+
+See the following table for what symbols are supported. They are listed in
+precedence order (so parentheses are highest, then exponent, and so on).
+
+<table>
+<tr>
+<th>Symbol</th><th>Examples</th><th>Explanation</th>
+</tr>
+
+<tr>
+<td>`' "`</td>
+<td>
+
+`'foobar'`
+
+`"text value"`
+
+</td>
+<td>
+
+Use `'` or `"` to enclose a string literal. Note that event scripts are given
+as long delimited strings, and in typical Content Patcher use you will need to
+escape your double-quotes (e.g. `myvar . \"my string\"`) in order for them to
+work properly, since they would end the JSON string otherwise.
+
+</td>
+</tr>
+
+<tr>
+<td>`()`</td>
+<td>
+
+`(1 + 2) * 3`
+
+</td>
+<td>
+
+Use parentheses to enclose operations and increase their precedence. In the
+example, `1 + 2` is evaluated first to `3`, then `3 * 3` is evaluated to `9`.
+Without the parentheses, `2 * 3` evaluates first to `6`, then `1 + 6` becomes
+`7`.
+
+</td>
+</tr>
+
+<tr>
+<td>`^`</td>
+<td>`myvar ^ 2`</td>
+<td>
+
+The exponent operator will work only on integers and will not accept strings.
+Be careful not to exceed the positive integer limit of 2^31-1, or this will
+return the negative integer limit.
+
+</td>
+</tr>
+
+<tr>
+<td>`* \`</td>
+<td>
+
+`myvar * 4`
+
+`myvar * 3 \ 2`
+
+</td>
+<td>
+
+Multiply `*` and Divide `\` will work only on integers and will not accept
+strings.
+
+**Note**: Backslash `\` is also the JSON escape character, so in typical
+Content Patcher use you will need to type two backslashes `\\` to represent
+one, just like in vanilla's `quickQuestion`. The parser will also accept `/`,
+but in an event context I'm not sure it's possible to provide one, since that
+breaks to a new event command.
+
+**Reminder**: floating-point is not supported, so `\` will drop any decimal
+portion of its result. `9 \ 2` yields `4`.
+
+</td>
+</tr>
+
+<tr>
+<td>`+ -`</td>
+<td>
+
+`myvar + 4`
+
+`-1 * (myvar - 1)`
+
+</td>
+<td>
+
+Add `+` and Subtract `-` will work only on integers and will not accept
+strings. If you wish to add strings together, use Concatenate `.`.
+
+In addition to binary operation, `-` will work to negate an integer literal
+(so `-50` will behave as expected). But at this time, it will not work in
+this way on variable names, strings, or anything else, so you may need to
+be more explicit to avoid parse errors (e.g. `-1 * myvar` instead of `-myvar`).
+
+</td>
+</tr>
+
+<tr>
+<td>`= !=`</td>
+<td>
+
+`myvar = 4`
+
+`(myvar + 1) != 6`
+
+</td>
+<td>
+
+Compare two values for equality (`=`) or inequality (`!=`). This accepts
+strings or integers (and is a lexical comparison, even for integers, so e.g.
+`1 = '1'` will evaluate to `true`).
+
+**Note for programmers**: You can use double-equals `==` for equality if you
+want. You're welcome.
+
+</td>
+</tr>
+
+<tr>
+<td>`< <= > >=`</td>
+<td>
+
+`myvar < 5`
+
+`myvar >= anothervar`
+
+</td>
+<td>
+
+Like `=` and `!=`, but for
+less-than/less-than-or-equal/greater-than/greater-than-or-equal, respectively.
+
+</td>
+</tr>
+
+<tr>
+<td>`.`</td>
+<td>
+
+`myvar . 'foobar'`
+
+`myvar . 23`
+
+</td>
+<td>
+
+The Concatenate (`.`) operator smushes the string representations of the two
+surrounding values together. This will happily convert numbers to strings, so
+`1 . 'asdf'` yields `'1asdf'`, and likewise `myvar . 15` takes the contents of
+`myvar` and appends the string `'15'` to it.
+
+**Note**: this is the lowest-precedence operator, so deploy parentheses if
+needed.
+
+**Note**: if you try to use a decimal number (e.g. `3 * 1.5`), the parser will
+interpret the dot as this operator. The previous example would yield `35`.
+
+</td>
+</tr>
+
+</table>
+
+For example, you could use:
+
+`ichortower.ECC_VarSet myvalue 4`
+
+... which would set a variable called "myvalue" to the value 4. Or:
+
+`ichortower.ECC_VarSet myvalue myvalue + 1`
+
+... to increment its current value. You can combine a lot of stuff:
+
+`ichortower.ECC_VarSet myvalue (1+anothervalue) * (12-5) . ' points'`
+
+... which does the math as you would expect (5 \* 7), then concatenates it
+with the text to generate the string "35 points".
+
+
+### `VAR_QUERY`
+
+`ichortower.ECC_VAR_QUERY <value|expression>`
+
+This game state query uses the same expression parsing as `VarSet`, above, but
+instead of storing the result into a named variable, it evaluates the
+expression and returns true or false: false if it yields the string "false"
+(case-insensitive) or the value 0, and true otherwise. Note that this means
+that an empty string `""` and maybe some other unintuitive results will
+evaluate to true.
+
+This is intended for use with `If`/`ElseIf`/`Else`/`EndIf`. You can use it in
+other contexts if you like, but I doubt that it is useful to do so: outside of
+an event, you won't be able to access any variables.
 
 
 ## Vanilla Command Notes

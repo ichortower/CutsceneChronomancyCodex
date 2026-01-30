@@ -18,6 +18,8 @@ Here are some of the things you can do with these commands:
 * Set up parallel command lists that run without blocking the event loop
 * Loop, stop, restart, and/or wait for parallel lists to finish executing
 * Execute blocks of commands conditionally with If/ElseIf/Else/EndIf
+* Set, do arithmetic on, and query your own event variables (goes well with
+    conditional execution)
 * Cause an event to "take time" by advancing the world time when it completes
     (correctly processing machines and advancing NPCs along their schedules)
 * Make temporary map tile changes or apply map overrides that last only until
@@ -32,8 +34,8 @@ for details!
 Whether you're a user or a mod author, all you have to do to use this mod is
 install it like any other: download it and unzip it into your Mods folder.
 There's no API or data assets or anything: this just uses built-in code
-endpoints to register new event commands (and one trigger action), so as long
-as it's present, the commands will be available.
+endpoints to register new event commands (and one trigger action, and one game
+state query), so as long as it's present, the commands will be available.
 
 
 ## Building
