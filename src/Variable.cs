@@ -20,6 +20,10 @@ internal class Variable
             context.LogErrorAndSkip(err);
             return;
         }
+        if (varName.StartsWithIgnoreCase("ECC")) {
+            context.LogErrorAndSkip($"variable name must not start with 'ECC'");
+            return;
+        }
         if (args.Length < 3) {
             context.LogErrorAndSkip($"no expression found after variable name");
             return;
@@ -50,7 +54,7 @@ internal class Variable
     }
 
 
-    public static bool GSQ_VarQuery(string[] query, GameStateQueryContext context)
+    public static bool GSQ_VAR_QUERY(string[] query, GameStateQueryContext context)
     {
         string err = null;
         if (query.Length < 2) {
