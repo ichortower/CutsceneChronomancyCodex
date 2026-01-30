@@ -369,14 +369,26 @@ internal class ExprNode
                 };
             }
 
-            // FIXME these error messages are mega bad
             if (ExpectingOperator(root) && current.ShouldCountAsValue) {
-                err = $"expected operator but found value";
+                err = $"unexpected value '{current.Token.Value}': expected operator";
                 return false;
             }
             if (ExpectingValue(root) && !current.ShouldCountAsValue) {
-                err = $"expected value but found operator";
-                return false;
+                // support unary minus by trying to get an int out of next token
+                if (token.IsOperator(ExprOperator.Subtract) && i+1 < input.Length) {
+                    if (!ParseArray(input[(i+1)..(i+2)], out ExprNode next, out err)) {
+                        return false;
+                    }
+                    if (next.Token.Type == ExprTokenType.IntLiteral) {
+                        current = next;
+                        current.Token.Value = $"{-1 * int.Parse(current.Token.Value)}";
+                        ++i;
+                    }
+                }
+                else {
+                    err = $"unexpected operator '{current.Token.Value}': expected value";
+                    return false;
+                }
             }
 
             if (!AddNode(ref root, current, out err)) {
