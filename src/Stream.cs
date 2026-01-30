@@ -315,7 +315,7 @@ internal class Streams
 
     internal static void CleanUp()
     {
-        Log.Debug("Running cleanup function");
+        Log.Debug("running stream cleanup");
         streamRunner = null;
         OpenStreams.Clear();
         CleanupQueued = false;

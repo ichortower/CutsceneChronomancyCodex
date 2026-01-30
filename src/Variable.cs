@@ -13,7 +13,7 @@ namespace ichortower.ECC;
 internal class Variable
 {
 
-    public static void command_VariableSet(SEvent evt, string[] args, EventContext context)
+    public static void command_VarSet(SEvent evt, string[] args, EventContext context)
     {
         string err;
         if (!ArgUtility.TryGet(args, 1, out string varName, out err)) {
@@ -24,27 +24,46 @@ internal class Variable
             context.LogErrorAndSkip($"no expression found after variable name");
             return;
         }
-        /*
-        ExprSyntaxTree ast = new();
-        if (!ast.EvalString(string.Join(" ", args[2..]), out string res, out err)) {
+        if (!ExprNode.EvalString(string.Join(" ", args[2..]), out string res, out err)) {
             context.LogErrorAndSkip(err);
             return;
         }
         VarDict[varName] = res;
-        */
+        if (!CleanupQueued) {
+            // register this to main event instead of evt, so cleanup will still fire
+            // if this is used in a stream
+            Game1.CurrentEvent.onEventFinished += CleanUp;
+            CleanupQueued = true;
+        }
         ++evt.CurrentCommand;
     }
 
     internal static Dictionary<string, string> VarDict = new();
 
-    //variableset myvar 6
-    //variableset myvar othervar + 1
+    internal static bool CleanupQueued = false;
 
-
-
-    public static bool GSQ_VariableQuery(string[] query, GameStateQueryContext context)
+    internal static void CleanUp()
     {
-        return false;
+        Log.Debug("running var cleanup");
+        VarDict.Clear();
+        CleanupQueued = false;
+    }
+
+
+    public static bool GSQ_VarQuery(string[] query, GameStateQueryContext context)
+    {
+        string err = null;
+        if (query.Length < 2) {
+            err = "Requires input to parse";
+            return GameStateQuery.Helpers.ErrorResult(query, err);
+        }
+        if (!ExprNode.EvalString(string.Join(" ", query[1..]), out string res, out err)) {
+            return GameStateQuery.Helpers.ErrorResult(query, err);
+        }
+        if (res.EqualsIgnoreCase("false") || res == "0") {
+            return false;
+        }
+        return true;
     }
 
 }

@@ -48,14 +48,18 @@ internal sealed class ModMain : Mod
     {
         MethodInfo[] funcs = t.GetMethods(BindingFlags.Public | BindingFlags.Static);
         foreach (var func in funcs) {
-            if (!func.Name.StartsWith("command_")) {
-                continue;
+            if (func.Name.StartsWith("command_")) {
+                string key = func.Name.Replace("command_", $"{Main.ModId}_");
+                StardewValley.Event.RegisterCommand(key,
+                        (EventCommandDelegate) Delegate.CreateDelegate(
+                        typeof(EventCommandDelegate), func));
             }
-            string key = func.Name.Replace("command_",
-                    $"{Main.ModId}_");
-            StardewValley.Event.RegisterCommand(key,
-                    (EventCommandDelegate) Delegate.CreateDelegate(
-                    typeof(EventCommandDelegate), func));
+            else if (func.Name.StartsWith("GSQ_")) {
+                string key = func.Name.Replace("GSQ_", $"{Main.ModId}_");
+                GameStateQuery.Register(key,
+                        (GameStateQueryDelegate) Delegate.CreateDelegate(
+                        typeof(GameStateQueryDelegate), func));
+            }
         }
     }
 }
