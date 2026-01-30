@@ -498,15 +498,13 @@ internal class ExprNode
         value = null;
         err = null;
         int here = index + 1;
-        // for now just special case the parens since they are the only ones that make sense
-        // to be right next to each other
-        if (input[index] == '(' || input[index] == ')') {
-            value = input[index..here];
-            return true;
-        }
+        // get the biggest operator we can (i.e. stop when input becomes invalid)
         while (here < input.Length) {
             char c = input[here];
             if (char.IsWhiteSpace(c) || char.IsLetterOrDigit(c)) {
+                break;
+            }
+            if (!OpDict.TryGetValue(input[index..(here+1)], out var _)) {
                 break;
             }
             ++here;
