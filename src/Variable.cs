@@ -106,10 +106,10 @@ internal class ExprNode
         CloseParen,   // )
         Exponent,     // ^
         Multiply,     // *
-        Divide,       // /
+        Divide,       // \, /
         Add,          // +
         Subtract,     // -
-        Equal,        // =
+        Equal,        // =, ==
         NotEqual,     // !=
         LessThan,     // <
         GreaterThan,  // >
@@ -124,9 +124,11 @@ internal class ExprNode
         { "^",  ExprOperator.Exponent },
         { "*",  ExprOperator.Multiply },
         { "/",  ExprOperator.Divide },
+        { "\\", ExprOperator.Divide },
         { "+",  ExprOperator.Add },
         { "-",  ExprOperator.Subtract },
         { "=",  ExprOperator.Equal },
+        { "==", ExprOperator.Equal },
         { "!=", ExprOperator.NotEqual },
         { "<",  ExprOperator.LessThan },
         { ">",  ExprOperator.GreaterThan },
@@ -185,6 +187,12 @@ internal class ExprNode
             ExprOperator.Divide => 3,
             ExprOperator.Add => 2,
             ExprOperator.Subtract => 2,
+            ExprOperator.Equal => 1,
+            ExprOperator.NotEqual => 1,
+            ExprOperator.LessThan => 1,
+            ExprOperator.GreaterThan => 1,
+            ExprOperator.LessEqual => 1,
+            ExprOperator.GreaterEqual => 1,
             _ => 0,
         };
     }
