@@ -530,11 +530,35 @@ to know this, but if something weird happens, maybe that will help you figure
 it out.
 
 See the following table for what symbols are supported. They are listed in
-precedence order (so parentheses are highest, then exponent, and so on).
+precedence order, although the variable and string notes are not ranked (so,
+excluding those, parentheses are highest, then exponent, and so on).
 
 <table>
 <tr>
 <th>Symbol</th><th>Examples</th><th>Explanation</th>
+</tr>
+
+<tr>
+<td>
+
+plain name
+
+</td>
+<td>
+
+`myvar`
+
+</td>
+<td>
+
+To reference a variable in an expression, just use its name as-is (but remember
+that it is case-sensitive). When evaluated, it will be replaced with the value
+you last stored in it.
+
+A variable must be set before referencing it, or you will get an evaluation
+error.
+
+</td>
 </tr>
 
 <tr>
@@ -545,8 +569,7 @@ precedence order (so parentheses are highest, then exponent, and so on).
 </td>
 <td>
 
-`'foobar'`
-
+`'foobar'`\
 `"text value"`
 
 </td>
@@ -609,8 +632,7 @@ return the negative integer limit.
 </td>
 <td>
 
-`myvar * 4`
-
+`myvar * 4`\
 `myvar * 3 \ 2`
 
 </td>
@@ -639,8 +661,7 @@ portion of its result. `9 \ 2` yields `4`.
 </td>
 <td>
 
-`myvar + 4`
-
+`myvar + 4`\
 `-1 * (myvar - 1)`
 
 </td>
@@ -665,8 +686,7 @@ be more explicit to avoid parse errors (e.g. `-1 * myvar` instead of `-myvar`).
 </td>
 <td>
 
-`myvar = 4`
-
+`myvar = 4`\
 `(myvar + 1) != 6`
 
 </td>
@@ -690,8 +710,7 @@ want. You're welcome.
 </td>
 <td>
 
-`myvar < 5`
-
+`myvar < 5`\
 `myvar >= anothervar`
 
 </td>
@@ -711,8 +730,7 @@ less-than/less-than-or-equal/greater-than/greater-than-or-equal, respectively.
 </td>
 <td>
 
-`myvar . 'foobar'`
-
+`myvar . 'foobar'`\
 `myvar . 23`
 
 </td>
