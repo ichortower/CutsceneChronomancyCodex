@@ -502,8 +502,8 @@ or string values, then change your event's behavior accordingly.
 `ichortower.ECC_VarSet <name> <value|expression>`
 
 This command sets a user-defined variable to the value or expression that
-follows it. You can use it to save a value for later, or to keep track of a
-running total, or other similar actions.
+follows it. You can use it to save a value for later (say, the player's choice
+in some situation), or to keep track of a running total, or things like that.
 
 When picking a variable name, there are a few restrictions:
 
@@ -512,7 +512,12 @@ When picking a variable name, there are a few restrictions:
 * it must not start with 'ECC' (case-insensitive; this is to prevent
     collisions with planned future features)
 
-Other than those, you can choose whatever you like.
+Other than those, you can choose whatever you like. **Variable names are
+case-sensitive**.
+
+The variables are purely local to the event, and are purged when the event
+ends, so you need not worry about collisions (except with yourself). However,
+they are freely accessible from any stream, to both read and write.
 
 The expression parsing and evaluation proceeds as you might expect, including
 operator precedence, but note that it supports only integers and strings (no
