@@ -201,7 +201,7 @@ internal class Stream
                 context.LogErrorAndSkip($"requested unknown stream id '{args[i]}'");
                 return;
             }
-            if (target.Equals(evt)) {
+            if (System.Object.ReferenceEquals(target, evt)) {
                 context.LogErrorAndSkip($"stream '{args[i]}' cannot await itself");
                 return;
             }
