@@ -795,6 +795,14 @@ When not passing the optional `true` to avoid blocking, this is hardcoded to
 advance the main command list when the emote expires. In a stream, you should
 always use the optional `true` and then `StreamPause` if you need to block.
 
+### `faceDirection`
+
+Like `emote`, to use this command in a stream you must provide the optional
+`true` to avoid blocking (and then use `StreamPause` if you wish to block).
+Without it, this uses the global pause time field to delay execution, which
+advances the main command list on expiration and will leave the stream
+softlocked.
+
 ### `pause`
 
 This command uses a global field (`Game1.pauseTime`) which is hardcoded to
