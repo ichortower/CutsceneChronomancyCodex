@@ -1,9 +1,11 @@
 using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Extensions;
+using StardewValley.TokenizableStrings;
 using System;
 using System.Collections.Generic;
 
+using ichortower.TowerCore;
 using Log = ichortower.TowerCore.Log;
 using Main = ichortower.TowerCore.Main;
 using SEvent = StardewValley.Event;
@@ -53,8 +55,10 @@ internal class Variable
         CleanupQueued = false;
     }
 
+    internal static bool ParsingCommandList = false;
 
-    public static bool GSQ_VAR_QUERY(string[] query, GameStateQueryContext context)
+
+    public static bool gsq_VAR_QUERY(string[] query, GameStateQueryContext context)
     {
         string err = null;
         if (query.Length < 2) {
@@ -68,6 +72,38 @@ internal class Variable
             return false;
         }
         return true;
+    }
+
+
+    public static bool token_VarEval(string[] query, out string replacement, Random random, Farmer player)
+    {
+        if (ParsingCommandList) {
+            replacement = null;
+            return false;
+        }
+        string err = null;
+        if (query.Length < 2) {
+            err = "Requires input to parse";
+            return TokenParser.LogTokenError(query, err, out replacement);
+        }
+        if (!ExprNode.EvalString(string.Join(" ", query[1..]), out replacement, out err)) {
+            return TokenParser.LogTokenError(query, err, out replacement);
+        }
+        return true;
+    }
+
+    [TargetMethod(typeof(SEvent), nameof(SEvent.ParseCommands))]
+    [PatchType(PatchTypes.Prefix)]
+    public static void Event_ParseCommands_Prefix()
+    {
+        ParsingCommandList = true;
+    }
+
+    [TargetMethod(typeof(SEvent), nameof(SEvent.ParseCommands))]
+    [PatchType(PatchTypes.Postfix)]
+    public static void Event_ParseCommands_Postfix()
+    {
+        ParsingCommandList = false;
     }
 
 }

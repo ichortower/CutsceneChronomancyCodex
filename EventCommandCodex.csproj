@@ -2,6 +2,7 @@
     <PropertyGroup>
         <Version>0.9.0-beta</Version>
         <TargetFramework>net6.0</TargetFramework>
+        <EnableHarmony>true</EnableHarmony>
 
         <ModFolderName>$(MOD_NAME)</ModFolderName>
     </PropertyGroup>
