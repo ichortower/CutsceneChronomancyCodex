@@ -98,12 +98,6 @@ The power this gives you might not be obvious, so let's consider an example:
 (example to follow when fully baked)
 ```
 
-When a stream command explanation refers to "a stream", the main command list
-should also be considered a stream, even though it does not have a stream id
-and can't be targeted by stream command arguments. For example, `StreamPause`
-works on "the current stream", but that means it works on the main event as
-well, and not only inside a stream context.
-
 
 ### `StreamStart`
 
@@ -193,9 +187,9 @@ A stream can restart itself (but see `StreamLoop`).
 A shortcut version of `StreamRestart` which works only on the current stream
 and restarts it by setting its command index to 0.
 
-It will work on the main stream, but I don't see much use for it without the
-`goto` features promised for 1.7 (and when we get those, you should just use
-`goto`).
+You can also use this in the main command list, but I don't see much use for
+it until `goto` arrives in 1.6.16 (and when it arrives, you should just use
+it instead of this).
 
 
 ## Stream-Safe Command Replacements
