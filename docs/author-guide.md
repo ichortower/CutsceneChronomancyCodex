@@ -10,10 +10,13 @@ This document explains how to use the event commands added by this mod.
   * [StreamStart](#streamstart)
   * [StreamEnd](#streamend)
   * [StreamAwait](#streamawait)
-  * [StreamPause](#streampause)
   * [StreamHalt](#streamhalt)
   * [StreamRestart](#streamrestart)
   * [StreamLoop](#streamloop)
+* [Stream-Safe Command Replacements](#stream-safe-command-replacements)
+  * [Emote](#emote)
+  * [FaceDirection](#facedirection)
+  * [Pause](#pause)
 * [Actor Control](#actor-control)
   * [ActorPathTo](#actorpathto)
   * [ActorAwaitMovement](#actorawaitmovement)
@@ -43,19 +46,31 @@ This document explains how to use the event commands added by this mod.
 
 Here are a few terms and things to know to help you read this document.
 
-* If you are here for the beta, please check out the example text files in
-  the beta zip! There are some (fairly simple) scripts in there that may help
-  you understand a particular command more clearly than my prose here.\
-  Each one is formatted correctly to be used as a test event, so simply copy
-  the `.txt` file to your game directory, rename it `test_event.txt`, and
-  run `debug rte` in your SMAPI console to run it directly. There is no need
-  to patch reload or anything else; it will be read live.
-* When a command says that it "blocks" (verb) (or talks about another command
-  "blocking"), that means that it will pause at that point in the command
-  list and prevent the stream from continuing until some condition is met.
-  For example, `move <npc> 3 0 2` blocks, because the optional `true`
-  argument was not given, so the stream will wait until the move completes
-  before running the next command.
+If you are here for the beta, please check out the example text files in
+the beta zip! There are some (fairly simple) scripts in there that may help
+you understand a particular command more clearly than my prose here.
+
+Each one is formatted correctly to be used as a test event, so simply copy
+the `.txt` file to your game directory, rename it `test_event.txt`, and
+run `debug rte` in your SMAPI console to run it directly. There is no need
+to patch reload or anything else; it will be read live.
+
+When a command says that it "blocks" (verb) (or talks about another command
+"blocking"), that means that it will pause at that point in the command
+list and prevent the stream from continuing until some condition is met.
+For example, `move <npc> 3 0 2` blocks, because the optional `true`
+argument was not given, so the stream will wait until the move completes
+before running the next command.
+
+Unlike vanilla, Codex commands that have a behavior toggle argument (e.g.
+`ViewportMove`) are set up to expect a particular literal string instead of
+the boolean strings `false`/`true`. I made this choice for ideological
+reasons: I prefer when a boolean argument makes its purpose more clear at the
+call site, since for me it reduces the burden of remembering what "true"
+stands for in a particular command.
+
+For example, `ViewportMove` has an optional argument `wait`. It expects to
+find the string "wait" there, not the string "true".
 
 
 ## Stream Control
@@ -143,21 +158,7 @@ any protection against circular awaiting, so be careful not to do that.
 
 ### `StreamPause`
 
-`ichortower.ECC_StreamPause <int> [int...]`
-
-This command is like `pause`, but instead of using a global timer, this blocks
-execution only on the current stream.
-
-The arguments are any number of integers, each meaning a number of
-milliseconds. This command will choose one of the values at random, and pause
-for that length of time; so with one value it will behave just like vanilla
-`pause`, but you can have a random delay by giving multiple options, if you
-like.
-
-This command works by replacing itself with an instance of `precisePause`, the
-undocumented vanilla event command which (as it turns out) has the correct
-behavior already. You can use `precisePause` instead if you like, but I think
-this one has a clearer name, and this one allows randomness.
+Defunct. See [Pause](#pause).
 
 
 ### `StreamHalt`
@@ -195,6 +196,49 @@ and restarts it by setting its command index to 0.
 It will work on the main stream, but I don't see much use for it without the
 `goto` features promised for 1.7 (and when we get those, you should just use
 `goto`).
+
+
+## Stream-Safe Command Replacements
+
+Some vanilla commands do not work as expected when used in streams (see
+[Vanilla Command Notes](#vanilla-command-notes) for more details). For this
+reason, the Codex includes replacements for some of them.
+
+In general, you do not have to use these commands yourself: the Codex will
+automatically replace the vanilla commands with the stream-safe versions when
+a new stream contains them. However, they do sometimes have additional
+features, so maybe you will find them useful.
+
+
+### `Emote`
+
+`ichortower.ECC_Emote <actor> <number> [wait]`
+
+A replacement for `emote`, which can misbehave when used in a stream. It uses
+the same arguments as the vanilla command, except for the last one: by default,
+this command **does not** wait for the emote to finish before proceeding. To
+obtain that behavior, give the optional argument `wait`.
+
+
+### `FaceDirection`
+
+`ichortower.ECC_FaceDirection <actor> <direction> [delay|duration]`
+
+A replacement for `faceDirection`, which can misbehave when used in a stream.
+The actor and direction arguments are the same as vanilla, but the optional
+extra argument is different: it can be either the string `delay`, which causes
+the default vanilla delay of 500 milliseconds, or an integer, which will cause
+a delay of that many milliseconds. Like `emote`, if the delay argument is
+omitted, the default behavior is **not to block** after facing the actor.
+
+
+### `Pause`
+
+`ichortower.ECC_Pause <int> [int...]`
+
+A replacement for `pause`, which does not work in streams. Unlike `pause`,
+this one accepts any number of integer arguments as pause durations, and will
+choose one of them at random.
 
 
 ## Actor Control
@@ -786,43 +830,63 @@ an event, you won't be able to access any variables.
 
 ## Vanilla Command Notes
 
-There are some vanilla commands which don't fully work with streams. The known
-problems are documented here, so you can be aware of them.
+There are some vanilla commands which cause problems when used in streams
+outside of the main command list. Whenever possible, the Codex will
+automatically replace them with its own alternatives when they appear in a new
+stream's command list, so in most cases you should not need to know about these
+behaviors and can keep using vanilla commands the way you are used to; but note
+that any errors you get in your log will reference the replacement command
+string.
+
+The most common problem is that something started by a particular command
+directly advances the main command list index from somewhere else in the
+codebase. This both causes the main list to jump forward at inappropriate times
+and also leaves the stream softlocked, since its index remains where it was.
+
+The commands and their behavior are documented here. The ones without adequate
+substitutes are so noted.
 
 ### `emote`
 
 When not passing the optional `true` to avoid blocking, this is hardcoded to
-advance the main command list when the emote expires. In a stream, you should
-always use the optional `true` and then `StreamPause` if you need to block.
+advance the main command list when the emote expires. In a stream, your
+`emote` command will be replaced as follows:
+
+`'emote <actor> <num>'      -> 'ichortower.ECC_Emote <actor> <num> wait'`\
+`'emote <actor> <num> true' -> 'ichortower.ECC_Emote <actor> <num>'`
 
 ### `faceDirection`
 
-Like `emote`, to use this command in a stream you must provide the optional
-`true` to avoid blocking (and then use `StreamPause` if you wish to block).
-Without it, this uses the global pause time field to delay execution, which
-advances the main command list on expiration and will leave the stream
-softlocked.
+When not passing the optional `true` to avoid blocking, this command uses the
+global pause timer (see `pause`, below) to implement its delay. In a stream,
+your `faceDirection` command will be replaced as follows:
+
+`'faceDirection <actor> <dir>'      -> 'ichortower.ECC_FaceDirection <actor> <dir> delay'`\
+`'faceDirection <actor> <dir> true' -> 'ichortower.ECC_FaceDirection <actor> <dir>'`
 
 ### `pause`
 
 This command uses a global field (`Game1.pauseTime`) which is hardcoded to
-advance the main command list when it expires, so it cannot be used in any
-other stream. Use `precisePause` or `StreamPause` instead.
+advance the main command list when it expires. In a stream, your `pause`
+command will be replaced as follows:
+
+`'pause <ms>' -> 'ichortower.ECC_Pause <ms>'`
 
 ### `quickQuestion`
 
-In order to execute the scripts, this command injects them hardcodedly into
-the main command list, so I would not try using it in a stream if I were you.
+In order to execute the embedded scripts, this command injects them hardcodedly
+into the main command list. There is no substitute available at this time.
 
 ### `speak`
 
 To proceed, this command relies on the `DialogueBox` class, which is hardcoded
-to advance the main command list when it closes. As a result, this command
-cannot be used in any other stream. There is no replacement at this time.
+to advance the main command list when it closes. There is no substitute
+available at this time.
 
 ### `speed`
 
 When used with NPC actors, this command behaves as expected in any stream.
 When used with a farmer, the speed change is local to the stream, and movements
-in other streams will not see the value.
+in other streams will not see the value. There is no substitute, so you must be
+aware of the behavior when using this command.
 
