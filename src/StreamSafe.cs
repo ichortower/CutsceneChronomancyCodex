@@ -144,6 +144,14 @@ internal class StreamSafe
         }
     }
 
+
+    public static void command_Message(SEvent evt, string[] args, EventContext context)
+    {
+        context.LogErrorAndSkip($"this command should not be executed. Please make sure that" +
+                " you do not use the 'message' command inside a stream block");
+    }
+
+
     public static void command_Pause(SEvent evt, string[] args, EventContext context)
     {
         if (evt.IsStatus(StreamStatus.AwaitingDelay)) {
@@ -167,18 +175,13 @@ internal class StreamSafe
         evt.SetStatus(StreamStatus.AwaitingDelay);
     }
 
+
     public static void command_Speak(SEvent evt, string[] args, EventContext context)
     {
-        ++evt.CurrentCommand;
+        context.LogErrorAndSkip($"this command should not be executed. Please make sure that" +
+                " you do not use the 'speak' command inside a stream block");
     }
 
-/*
-    internal static Dictionary<string, Func<string, string>> WonkHandlers = new() {
-        {"emote ", SubstituteEmote},
-        {"faceDirection ", SubstituteFaceDirection},
-        {"pause ", SubstitutePause},
-    };
-    */
 
     internal static void SubstituteWonkyCommands(ref string[] commands)
     {
@@ -192,7 +195,9 @@ internal class StreamSafe
     internal static List<Func<string, string>> WonkHandlers = new() {
         SubstituteEmote,
         SubstituteFaceDirection,
+        SubstituteMessage,
         SubstitutePause,
+        SubstituteSpeak,
     };
 
     internal static string SubstituteEmote(string input)
@@ -231,6 +236,18 @@ internal class StreamSafe
         return res;
     }
 
+    internal static string SubstituteMessage(string input)
+    {
+        string[] args = ArgUtility.SplitBySpaceQuoteAware(input);
+        if (args.Length == 0 || !args[0].EqualsIgnoreCase("message")) {
+            return input;
+        }
+        args[0] = $"{Main.ModId}_Message";
+        string res = $"{args[0]} \"{string.Join(" ", args[1..])}\"";
+        Log.Debug($"transformed: {input} -> {res}");
+        return res;
+    }
+
     internal static string SubstitutePause(string input)
     {
         string[] args = ArgUtility.SplitBySpaceQuoteAware(input);
@@ -239,6 +256,18 @@ internal class StreamSafe
         }
         args[0] = $"{Main.ModId}_Pause";
         string res = string.Join(" ", args);
+        Log.Debug($"transformed: {input} -> {res}");
+        return res;
+    }
+
+    internal static string SubstituteSpeak(string input)
+    {
+        string[] args = ArgUtility.SplitBySpaceQuoteAware(input);
+        if (args.Length == 0 || !args[0].EqualsIgnoreCase("speak")) {
+            return input;
+        }
+        args[0] = $"{Main.ModId}_Speak";
+        string res = $"{args[0]} {args[1]} \"{string.Join(" ", args[2..])}\"";
         Log.Debug($"transformed: {input} -> {res}");
         return res;
     }
