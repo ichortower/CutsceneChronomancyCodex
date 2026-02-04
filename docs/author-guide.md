@@ -39,6 +39,7 @@ This document explains how to use the event commands added by this mod.
 * [Event Variables](#event-variables)
   * [VarSet](#varset)
   * [VAR_QUERY](#var_query)
+  * [VarEval](#vareval)
 * [Vanilla Command Notes](#vanilla-command-notes)
 
 
@@ -820,6 +821,20 @@ evaluate to true.
 This is intended for use with `If`/`ElseIf`/`Else`/`EndIf`. You can use it in
 other contexts if you like, but I doubt that it is useful to do so: outside of
 an event, you won't be able to access any variables.
+
+
+### `VarEval`
+
+`[ichortower.ECC_VarEval <value|expression>]`
+
+This is a token resolver, for use in
+[tokenizable strings](https://stardewvalleywiki.com/Modding:Tokenizable_strings).
+This lets you evaluate your event variables inside parsed text: at the moment,
+the only use I am aware of is in the `speak` command (but remember to use that
+only on the main command list).
+
+I suppose you could use it to do basic math in dialogue elsewhere, but
+accessing the event vars is the real purpose.
 
 
 ## Vanilla Command Notes
