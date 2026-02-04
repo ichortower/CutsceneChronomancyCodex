@@ -13,8 +13,43 @@ using SEvent = StardewValley.Event;
 
 namespace ichortower.ECC;
 
-public static class Extensions
+
+internal enum StreamStatus {
+    Active = 0,
+    Ended = -484,
+    AwaitingEmote,
+    AwaitingDelay,
+    AwaitingSpeak,
+}
+
+internal static class Extensions
 {
+
+    internal static bool IsStatus(this SEvent evt, StreamStatus st)
+    {
+        return evt.int_useMeForAnything == (int)st;
+    }
+
+    internal static void SetStatus(this SEvent evt, StreamStatus st)
+    {
+        evt.int_useMeForAnything = (int)st;
+    }
+
+    internal static void SetDelayTimer(this SEvent evt, int millis)
+    {
+        evt.int_useMeForAnything2 = millis;
+    }
+
+    internal static bool TickDownDelayTimer(this SEvent evt, GameTime time)
+    {
+        if (!ichortower.TowerCore.Game.IsActive()) {
+            return false;
+        }
+        evt.int_useMeForAnything2 = Math.Max(0,
+                evt.int_useMeForAnything2 - time.ElapsedGameTime.Milliseconds);
+        return evt.int_useMeForAnything2 <= 0;
+    }
+
 
     /*
      * Unfortunate reimplementation of Event.Update, since there's no other way to sanely

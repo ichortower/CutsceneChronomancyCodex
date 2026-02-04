@@ -92,34 +92,6 @@ internal class Stream
 
 
     /*
-     * ichortower.ECC_StreamPause <duration> [duration... ]
-     *
-     * Pauses execution of the current stream (works on the "main" script as well, since
-     * streams are no different technically). Accepts any number of integer arguments
-     * representing different pause durations (in milliseconds), and will choose one at
-     * random from those provided.
-     *
-     * This works by picking a random value, then replacing itself with a
-     * precisePause command using the chosen value.
-     */
-    public static void command_StreamPause(SEvent evt, string[] args, EventContext context)
-    {
-        List<int> times = new();
-        for (int i = 1; i < Math.Max(2, args.Length); ++i) {
-            if (!ArgUtility.TryGetInt(args, i, out int millis, out string error)) {
-                context.LogErrorAndSkip(error);
-                return;
-            }
-            times.Add(millis);
-        }
-        int duration = (times.Count > 1 ? Game1.random.ChooseFrom(times) : times[0]);
-        evt.ReplaceCurrentCommand($"precisePause {duration}");
-        // update immediately so we don't waste a tick before starting the timer
-        evt.UpdateStream(context.Location, context.Time);
-    }
-
-
-    /*
      * ichortower.ECC_StreamLoop
      *
      * This command resets the current stream's command index to 0, causing it to restart
@@ -152,7 +124,7 @@ internal class Stream
                 return;
             }
             target.CurrentCommand = target.eventCommands.Length;
-            target.int_useMeForAnything = Streams.StreamEnded;
+            target.SetStatus(StreamStatus.Ended);
         }
         ++evt.CurrentCommand;
     }
@@ -176,7 +148,7 @@ internal class Stream
                 return;
             }
             target.CurrentCommand = 0;
-            target.int_useMeForAnything = 0;
+            target.SetStatus(StreamStatus.Active);
             Streams.StartStreamRunner();
         }
         ++evt.CurrentCommand;
@@ -205,7 +177,7 @@ internal class Stream
                 context.LogErrorAndSkip($"stream '{args[i]}' cannot await itself");
                 return;
             }
-            if (target.int_useMeForAnything != Streams.StreamEnded) {
+            if (!target.IsStatus(StreamStatus.Ended)) {
                 return;
             }
         }
@@ -224,8 +196,6 @@ internal class Stream
 
 internal class Streams
 {
-    internal const int StreamEnded = -484;
-
     internal static System.EventHandler<UpdateTickedEventArgs> streamRunner = null;
 
     internal static Dictionary<string, SEvent> OpenStreams = new();
@@ -235,7 +205,7 @@ internal class Streams
     internal static bool New(SEvent source, string streamId, string[] commands)
     {
         if (OpenStreams.ContainsKey(streamId) &&
-                OpenStreams[streamId].int_useMeForAnything != StreamEnded) {
+                !OpenStreams[streamId].IsStatus(StreamStatus.Ended)) {
             return false;
         }
         SEvent stream = new();
@@ -279,11 +249,11 @@ internal class Streams
         bool alive = false;
         foreach (var kvp in OpenStreams) {
             SEvent e = kvp.Value;
-            if (e.int_useMeForAnything == StreamEnded) {
+            if (e.IsStatus(StreamStatus.Ended)) {
                 continue;
             }
             if (e.CurrentCommand >= e.eventCommands.Length) {
-                e.int_useMeForAnything = StreamEnded;
+                e.SetStatus(StreamStatus.Ended);
                 continue;
             }
             alive = true;
