@@ -171,4 +171,75 @@ internal class StreamSafe
     {
         ++evt.CurrentCommand;
     }
+
+/*
+    internal static Dictionary<string, Func<string, string>> WonkHandlers = new() {
+        {"emote ", SubstituteEmote},
+        {"faceDirection ", SubstituteFaceDirection},
+        {"pause ", SubstitutePause},
+    };
+    */
+
+    internal static void SubstituteWonkyCommands(ref string[] commands)
+    {
+        for (int i = 0; i < commands.Length; ++i) {
+            foreach (var func in WonkHandlers) {
+                commands[i] = func(commands[i]);
+            }
+        }
+    }
+
+    internal static List<Func<string, string>> WonkHandlers = new() {
+        SubstituteEmote,
+        SubstituteFaceDirection,
+        SubstitutePause,
+    };
+
+    internal static string SubstituteEmote(string input)
+    {
+        string[] args = ArgUtility.SplitBySpaceQuoteAware(input);
+        if (args.Length == 0 || !args[0].EqualsIgnoreCase("emote")) {
+            return input;
+        }
+        args[0] = $"{Main.ModId}_Emote";
+        string res;
+        if (args[args.Length-1].EqualsIgnoreCase("true")) {
+            res = string.Join(" ", args[0..(args.Length-1)]);
+        }
+        else {
+            res = string.Join(" ", args) + " wait";
+        }
+        Log.Debug($"transformed: {input} -> {res}");
+        return res;
+    }
+
+    internal static string SubstituteFaceDirection(string input)
+    {
+        string[] args = ArgUtility.SplitBySpaceQuoteAware(input);
+        if (args.Length == 0 || !args[0].EqualsIgnoreCase("faceDirection")) {
+            return input;
+        }
+        args[0] = $"{Main.ModId}_FaceDirection";
+        string res;
+        if (args[args.Length-1].EqualsIgnoreCase("true")) {
+            res = string.Join(" ", args[0..(args.Length-1)]);
+        }
+        else {
+            res = string.Join(" ", args) + " delay";
+        }
+        Log.Debug($"transformed: {input} -> {res}");
+        return res;
+    }
+
+    internal static string SubstitutePause(string input)
+    {
+        string[] args = ArgUtility.SplitBySpaceQuoteAware(input);
+        if (args.Length == 0 || !args[0].EqualsIgnoreCase("pause")) {
+            return input;
+        }
+        args[0] = $"{Main.ModId}_Pause";
+        string res = string.Join(" ", args);
+        Log.Debug($"transformed: {input} -> {res}");
+        return res;
+    }
 }

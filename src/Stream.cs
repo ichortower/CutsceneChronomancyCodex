@@ -210,6 +210,7 @@ internal class Streams
         }
         SEvent stream = new();
         stream.id = $"{Main.ModId}_stream_{streamId}";
+        StreamSafe.SubstituteWonkyCommands(ref commands);
         stream.ReplaceAllCommands(commands);
         // actors and farmerActors should be ref copies in the new event
         stream.actors = source.actors;
