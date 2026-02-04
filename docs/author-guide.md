@@ -858,6 +858,21 @@ your `faceDirection` command will be replaced as follows:
 `'faceDirection <actor> <dir>'      -> 'ichortower.ECC_FaceDirection <actor> <dir> delay'`\
 `'faceDirection <actor> <dir> true' -> 'ichortower.ECC_FaceDirection <actor> <dir>'`
 
+### `message`
+
+To proceed after the dialogue box closes, this command relies on `DialogueBox`
+being hardcoded to advance the main command list. To make matters worse, it
+also uses the global pause timer to insert a short delay, so it is not suitable
+for use in streams.
+
+There is no substitute available at this time. If used in a stream, it will be
+replaced as follows:
+
+`'message <text>' -> 'ichortower.ECC_Message <text>'`
+
+... but executing that command will cause an error (this is deliberate, in
+order to warn you that your script is malformed).
+
 ### `pause`
 
 This command uses a global field (`Game1.pauseTime`) which is hardcoded to
@@ -873,9 +888,12 @@ into the main command list. There is no substitute available at this time.
 
 ### `speak`
 
-To proceed, this command relies on the `DialogueBox` class, which is hardcoded
-to advance the main command list when it closes. There is no substitute
-available at this time.
+Just like `message`, this uses `DialogueBox` and there is no substitute for its
+hardcoding at this time. If used in a stream, it will be replaced as follows:
+
+`'speak <actor> <dialogue>' -> 'ichortower.ECC_Speak <actor> <dialogue>'`
+
+... but executing that command will cause an error, just like with `message`.
 
 ### `speed`
 
