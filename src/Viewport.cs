@@ -121,27 +121,30 @@ internal class Viewport
     }
 
     private static void ViewportFunction(object sender, UpdateTickedEventArgs e) {
-        if (!ichortower.TowerCore.Game.IsActive()) {
-            return;
-        }
         if (Game1.eventOver || !Game1.eventUp || viewportQueue.Count == 0) {
             StopViewportWatcher();
             return;
         }
-        int now = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
         ViewportMove head = viewportQueue[0];
+        if (!ichortower.TowerCore.Game.IsActive()) {
+            if (head.StartMs > 0) {
+                head.StartMs += (int)Game1.currentGameTime.ElapsedGameTime.Milliseconds;
+            }
+            return;
+        }
+        int now = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
         if (head.StartMs == 0) {
             head.StartMs = now;
             head.StartX = Game1.viewport.X;
             head.EndX += head.TypeX switch {
-                ViewportMoveType.Relative => head.StartX,
-                ViewportMoveType.Absolute => -1 * Game1.viewport.Width/2,
+                CoordType.Relative => head.StartX,
+                CoordType.Absolute => -1 * Game1.viewport.Width/2,
                 _ => 0,
             };
             head.StartY = Game1.viewport.Y;
             head.EndY += head.TypeY switch {
-                ViewportMoveType.Relative => head.StartY,
-                ViewportMoveType.Absolute => -1 * Game1.viewport.Height/2,
+                CoordType.Relative => head.StartY,
+                CoordType.Absolute => -1 * Game1.viewport.Height/2,
                 _ => 0,
             };
             return;
