@@ -27,10 +27,10 @@ internal class Viewport
     /*
      * ichortower.ECC_ViewportMove <x> <y> <time> [override] [wait]
      *
-     * Each of x and y can be an unadorned integer, in which case it represents
-     * a tile delta (similar to `move`, except both axes can be nonzero at
-     * once), or the letter 'a' plus an integer, in which case it is an
-     * absolute tile coordinate.
+     * Each coordinate can be either relative or absolute:
+     *   plain integer (e.g. '12', '38'): absolute tile coordinate
+     *   + or - integer (e.g. '+2', '-8'): relative tile distance
+     *   'a' with integer (e.g. 'a54', 'a-12'): absolute tile coordinate, for negative absolutes
      *
      * time is in milliseconds and specifies how long the move should take.
      *
@@ -44,12 +44,14 @@ internal class Viewport
     {
         bool queueMode = true;
         string err = "";
-        if (!TryGetTarget(args[1], out int xDest, out ViewportMoveType xType, out err) ||
-                !TryGetTarget(args[2], out int yDest, out ViewportMoveType yType, out err) ||
+        if (!Coords.TryGetTarget(args[1], out int xDest, out CoordType xType, out err) ||
+                !Coords.TryGetTarget(args[2], out int yDest, out CoordType yType, out err) ||
                 !ArgUtility.TryGetInt(args, 3, out int duration, out err, "int duration")) {
             context.LogErrorAndSkip(err);
             return;
         }
+        xDest = xDest * 64 + (xType == CoordType.Absolute ? 32 : 0);
+        yDest = yDest * 64 + (yType == CoordType.Absolute ? 32 : 0);
         for (int i = 4; i < args.Length; ++i) {
             if (args[i].EqualsIgnoreCase("override")) {
                 queueMode = false;
@@ -103,31 +105,6 @@ internal class Viewport
      * Implementation details for viewport queue. Move along, folks
      * 
      */
-
-    private static bool TryGetTarget(string arg, out int target,
-            out ViewportMoveType type, out string err)
-    {
-        target = 0;
-        type = ViewportMoveType.None;
-        if (arg.StartsWith("a", StringComparison.OrdinalIgnoreCase)) {
-            if (!int.TryParse(arg.Substring(1), out int avalue)) {
-                err = $"'{arg}': integer not found following 'a'";
-                return false;
-            }
-            target = 64 * avalue + 32;
-            type = ViewportMoveType.Absolute;
-        }
-        else {
-            if (!int.TryParse(arg, out int dvalue)) {
-                err = $"'{arg}' could not be converted to integer";
-                return false;
-            }
-            target = 64 * dvalue;
-            type = ViewportMoveType.Relative;
-        }
-        err = null;
-        return true;
-    }
 
     private static System.EventHandler<UpdateTickedEventArgs> viewportWatcher = null;
 
@@ -201,13 +178,12 @@ internal class ViewportMove
     public int StartY = 0;
     public int EndX = 0;
     public int EndY = 0;
-    public ViewportMoveType TypeX = ViewportMoveType.None;
-    public ViewportMoveType TypeY = ViewportMoveType.None;
+    public CoordType TypeX = CoordType.None;
+    public CoordType TypeY = CoordType.None;
     public int Duration = 0;
     public int StartMs = 0;
 
-    public ViewportMove(int endx, ViewportMoveType typex,
-            int endy, ViewportMoveType typey, int duration)
+    public ViewportMove(int endx, CoordType typex, int endy, CoordType typey, int duration)
     {
         EndX = endx;
         EndY = endy;
@@ -215,11 +191,5 @@ internal class ViewportMove
         TypeY = typey;
         Duration = duration;
     }
-}
-
-internal enum ViewportMoveType {
-    None,
-    Relative,
-    Absolute,
 }
 
