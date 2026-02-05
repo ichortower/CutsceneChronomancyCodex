@@ -18,7 +18,7 @@ This document explains how to use the event commands added by this mod.
   * [FaceDirection](#facedirection)
   * [Pause](#pause)
 * [Actor Control](#actor-control)
-  * [ActorPathTo](#actorpathto)
+  * [ActorPathfind](#actorpathfind)
   * [ActorAwaitMovement](#actorawaitmovement)
   * [ActorAwaitAnimation](#actorawaitanimation)
   * [ActorHalt](#actorhalt)
@@ -241,13 +241,29 @@ choose one of them at random.
 These commands give you more flexibility when controlling actors (characters).
 
 
-### `ActorPathTo`
+### `ActorPathfind`
 
-`ichortower.ECC_ActorPathTo <actor> <x> <y> <facing> [wait]`
+`ichortower.ECC_ActorPathfind <actor> <x> <y> <facing> [wait]`
 
 This command tells any actor (farmer or NPC) to move to the given map
 coordinates, by using the pathfinder to figure out how to get there instead of
 relying on you giving them directions.
+
+The `<x>` and `<y>` arguments are expressed in map tiles, just like with `move`
+and `advancedMove`, and will accept a few different formats:
+
+* a plain positive integer (e.g. `12`, `38`): absolute coordinate
+* plain `0`, or `+` or `-` with an integer (e.g. `0`, `+2`, `-8`): relative coordinate
+* `a` with an integer (e.g. `a42`, `a0`, `a-1000`): absolute coordinate
+
+So, for example, `ichortower.ECC_ActorPathfind Emily +2 +6 2` tells Emily to
+find her way to the spot 2 tiles right and 6 tiles down from where she is
+currently, then face down. Likewise, `ichortower.ECC_ActorPathfind farmer 22 15 1`
+tells the farmer to go to the absolute coordinates (22, 15) and face right.
+
+The `a` prefix is unlikely to be a common need, but it allows you to specify an
+absolute zero or negative coordinate, since those would otherwise be interpreted
+as relative.
 
 This is very useful if you have been using streams and an actor has been
 halted at an unknowable point along a looping `advancedMove`, or any similar
@@ -329,13 +345,15 @@ well.
 
 This command sets up a viewport movement.
 
-`x` and `y` are given in *map tiles*, and can be either relative to the current
-position or absolute on the map. To use relative values, just use plain
-integers (so e.g. `1 2` would mean to move the viewport 1 tile right and 2
-tiles down). For absolute ones, prepend the letter `a` (or `A`; it's
-case-insensitive), so e.g. `a14 a20` would mean to move the viewport to (14,20).
-You may mix and match these, so `a22 3` is valid and means to move to x 22 and
-y 3 tiles down from the current position.
+`x` and `y` are given in map tiles, and can accept a few different formats,
+exactly the same as [`ActorPathfind`](#actorpathfind).
+
+* a plain positive integer (e.g. `12`, `38`): absolute coordinate
+* plain `0`, or `+` or `-` with an integer (e.g. `0`, `+2`, `-8`): relative coordinate
+* `a` with an integer (e.g. `a42`, `a0`, `a-1000`): absolute coordinate
+
+So you could move the viewport to (14, 20) by giving `14 20`, or you could move
+it 3 tiles down from its current position by giving `0 +3`.
 
 `duration` is in milliseconds and determines how long the move will take to
 complete.
