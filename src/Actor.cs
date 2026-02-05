@@ -173,20 +173,25 @@ internal class Actor
 
 
     /*
-     * ichortower.ECC_ActorPathTo <actor> <x> <y> <facingDirection> [wait]
+     * ichortower.ECC_ActorPathfind <actor> <x> <y> <facingDirection> [wait]
      *
      * Tells an event actor to move to a specific tile coordinate, but relies on the
      * pathfinder to calculate a route instead of requiring you to type out the steps.
      * This is mainly useful if you have halted a stream or otherwise don't know
      * exactly where an NPC will be standing, but want them to proceed to a fixed
      * location.
+     *
+     * The x and y coordinate parsing is the same as with ViewportMove (see Viewport.cs):
+     *   plain nonzero integer (e.g. '12', '38'): absolute tile coordinate
+     *   + or - integer, or 0 (e.g. '+2', '-8'): relative tile distance
+     *   'a' with integer (e.g. 'a54', 'a-12'): absolute tile coordinate, for absolutes <= 0
      */
-    public static void command_ActorPathTo(SEvent evt, string[] args, EventContext context)
+    public static void command_ActorPathfind(SEvent evt, string[] args, EventContext context)
     {
         string error;
         if (!ArgUtility.TryGet(args, 1, out string actorName, out error) ||
-                !ArgUtility.TryGetInt(args, 2, out int targetX, out error) ||
-                !ArgUtility.TryGetInt(args, 3, out int targetY, out error) ||
+                !Coords.TryGetTarget(args[2], out int targetX, out CoordType xType, out error) ||
+                !Coords.TryGetTarget(args[3], out int targetY, out CoordType yType, out error) ||
                 !ArgUtility.TryGetInt(args, 4, out int facingDirection, out error)) {
             context.LogErrorAndSkip(error);
             return;
@@ -196,6 +201,14 @@ internal class Actor
             context.LogErrorAndSkip($"no actor found with name '{actorName}'");
             return;
         }
+        if (xType == CoordType.Relative) {
+            targetX += actor.TilePoint.X;
+        }
+        if (yType == CoordType.Relative) {
+            targetY += actor.TilePoint.Y;
+        }
+        Log.Debug($"pathfind: {actorName} -> ({targetX} {targetY})");
+
         Stack<Point> foundPath = null;
         try {
             foundPath = PathFindController.findPath(actor.TilePoint,
