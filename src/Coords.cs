@@ -10,9 +10,11 @@ internal class Coords
         type = CoordType.Absolute;
         err = null;
         string toParse = arg;
+        bool ignoreZero = false;
         if (arg.StartsWithIgnoreCase("a")) {
             toParse = arg.Substring(1);
             type = CoordType.Absolute;
+            ignoreZero = true;
         }
         else if (arg.StartsWithIgnoreCase("-")) {
             toParse = arg;
@@ -27,6 +29,9 @@ internal class Coords
             err = $"'{arg}': could not convert '{toParse}' to integer";
             type = CoordType.None;
             return false;
+        }
+        if (target == 0 && !ignoreZero) {
+            type = CoordType.Relative;
         }
         return true;
     }
