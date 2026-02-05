@@ -28,9 +28,9 @@ internal class Viewport
      * ichortower.ECC_ViewportMove <x> <y> <time> [override] [wait]
      *
      * Each coordinate can be either relative or absolute:
-     *   plain integer (e.g. '12', '38'): absolute tile coordinate
-     *   + or - integer (e.g. '+2', '-8'): relative tile distance
-     *   'a' with integer (e.g. 'a54', 'a-12'): absolute tile coordinate, for negative absolutes
+     *   plain nonzero integer (e.g. '12', '38'): absolute tile coordinate
+     *   + or - integer, or 0 (e.g. '+2', '-8'): relative tile distance
+     *   'a' with integer (e.g. 'a54', 'a-12'): absolute tile coordinate, for absolutes <= 0
      *
      * time is in milliseconds and specifies how long the move should take.
      *
