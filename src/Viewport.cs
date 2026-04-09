@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -19,6 +20,10 @@ namespace ichortower.ECC;
  *   - express commands in useful units (tile coordinates) instead of pixels per frame
  *   - queue movements to enable complex behavior
  *   - wait for, stop, or preempt the queue whenever needed
+ *
+ * ... and some toys:
+ *
+ *   - screen shake
  * 
  */
 internal class Viewport
@@ -57,7 +62,7 @@ internal class Viewport
                 queueMode = false;
             }
             else if (args[i].EqualsIgnoreCase("wait")) {
-                evt.InsertNextCommand($"{Main.ModId}_ViewportAwait");
+                evt.InsertNextCommand($"{Main.ModId}_ViewportAwait move");
             }
             else {
                 context.LogError($"unknown argument '{args[i]}'",
@@ -65,10 +70,9 @@ internal class Viewport
             }
         }
         if (!queueMode) {
-            // this also clears the queue
-            StopViewportWatcher();
+            viewportMoveQueue.Clear();
         }
-        viewportQueue.Add(new ViewportMove(xDest, xType, yDest, yType, duration));
+        viewportMoveQueue.Add(new ViewportMove(xDest, xType, yDest, yType, duration));
         StartViewportWatcher();
         ++evt.CurrentCommand;
     }
@@ -88,15 +92,69 @@ internal class Viewport
 
 
     /*
-     * ichortower.ECC_ViewportAwait
+     * ichortower.ECC_ViewportAwait [move] [shake]
      *
-     * Wait for all queued viewport moves (via _ViewportMove) to finish.
+     * Wait for one or both viewport queues to finish. With no arguments, this will
+     * block until both viewport queues (moves and shakes) are empty. Specify just
+     * one type ('move' or 'shake', both case-insensitive) to wait for just that queue
+     * and leave the other one to run. Specifying both is equivalent to the plain
+     * no-arguments version, but is more explicit.
      */
     public static void command_ViewportAwait(SEvent evt, string[] args, EventContext context)
     {
-        if (viewportQueue.Count == 0) {
-            ++evt.CurrentCommand;
+        bool bothMode = true;
+        bool moveMode = false;
+        bool shakeMode = false;
+        for (int i = 1; i < args.Length; ++i) {
+            bothMode = false;
+            if (args[i].EqualsIgnoreCase("move")) {
+                moveMode = true;
+            }
+            else if (args[i].EqualsIgnoreCase("shake")) {
+                shakeMode = true;
+            }
+            else {
+                context.LogError($"unknown argument '{args[i]}'",
+                        willSkip: false);
+            }
         }
+        if ((bothMode || moveMode) && viewportMoveQueue.Count > 0) {
+            return;
+        }
+        if ((bothMode || shakeMode) && viewportShakeQueue.Count > 0) {
+            return;
+        }
+        ++evt.CurrentCommand;
+    }
+
+
+    public static void command_ViewportShake(SEvent evt, string[] args, EventContext context)
+    {
+        bool queueMode = true;
+        string err = "";
+        if (!ArgUtility.TryGetInt(args, 1, out int intensity, out err) ||
+                !ArgUtility.TryGetInt(args, 2, out int duration, out err)) {
+            context.LogErrorAndSkip(err);
+            return;
+        }
+        for (int i = 3; i < args.Length; ++i) {
+            if (args[i].EqualsIgnoreCase("override")) {
+                queueMode = false;
+            }
+            else if (args[i].EqualsIgnoreCase("wait")) {
+                evt.InsertNextCommand($"{Main.ModId}_ViewportAwait shake");
+            }
+            else {
+                context.LogError($"unknown argument '{args[i]}'",
+                        willSkip: false);
+            }
+        }
+        if (!queueMode) {
+            viewportShakeQueue.Clear();
+        }
+        viewportShakeQueue.Add(new ViewportShake(intensity, duration));
+        StartViewportWatcher();
+        ++evt.CurrentCommand;
     }
 
 
@@ -108,7 +166,11 @@ internal class Viewport
 
     private static System.EventHandler<UpdateTickedEventArgs> viewportWatcher = null;
 
-    private static List<ViewportMove> viewportQueue = new();
+    private static List<ViewportMove> viewportMoveQueue = new();
+    private static List<ViewportShake> viewportShakeQueue = new();
+
+    private static Point NullPoint = new(-1000, -1000);
+    private static Point viewportShakePrev = NullPoint;
 
     private static void StartViewportWatcher()
     {
@@ -121,16 +183,28 @@ internal class Viewport
     }
 
     private static void ViewportFunction(object sender, UpdateTickedEventArgs e) {
-        if (Game1.eventOver || !Game1.eventUp || viewportQueue.Count == 0) {
+        if (Game1.eventOver || !Game1.eventUp) {
             StopViewportWatcher();
             return;
         }
-        ViewportMove head = viewportQueue[0];
+        int moves = TryViewportMove();
+        int shakes = TryViewportShake();
+        // FIXME raindrop position adjustment here
+        if (moves + shakes == 0) {
+            StopViewportWatcher();
+        }
+    }
+
+    private static int TryViewportMove() {
+        if (viewportMoveQueue.Count == 0) {
+            return 0;
+        }
+        ViewportMove head = viewportMoveQueue[0];
         if (!ichortower.TowerCore.Game.IsActive()) {
             if (head.StartMs > 0) {
                 head.StartMs += (int)Game1.currentGameTime.ElapsedGameTime.Milliseconds;
             }
-            return;
+            return viewportMoveQueue.Count;
         }
         int now = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
         if (head.StartMs == 0) {
@@ -147,24 +221,57 @@ internal class Viewport
                 CoordType.Absolute => -1 * Game1.viewport.Height/2,
                 _ => 0,
             };
-            return;
+            return viewportMoveQueue.Count;
         }
         if (now >= head.StartMs + head.Duration) {
             Log.Debug("Viewport move complete");
             Game1.viewport.X = head.EndX;
             Game1.viewport.Y = head.EndY;
-            viewportQueue.RemoveAt(0);
-            return;
+            viewportMoveQueue.RemoveAt(0);
+            return viewportMoveQueue.Count;
         }
-        // FIXME also do the raindrop position adjustment
         float t = (float)(now - head.StartMs) / (float)head.Duration;
         Game1.viewport.X = (int)Utility.Lerp((float)head.StartX, (float)head.EndX, t);
         Game1.viewport.Y = (int)Utility.Lerp((float)head.StartY, (float)head.EndY, t);
+        return viewportMoveQueue.Count;
+    }
+
+    private static int TryViewportShake() {
+        if (viewportShakeQueue.Count == 0) {
+            return 0;
+        }
+        if (!ichortower.TowerCore.Game.IsActive()) {
+            return viewportShakeQueue.Count;
+        }
+        ViewportShake head = viewportShakeQueue[0];
+        Point thisTime = new() {
+            X = Game1.random.Next(-1 * head.Intensity, head.Intensity + 1),
+            Y = Game1.random.Next(-1 * head.Intensity, head.Intensity + 1),
+        };
+        // no need to subtract out previous move if viewport queue is actively setting x/y
+        if (viewportMoveQueue.Count == 0 && viewportShakePrev != NullPoint) {
+            Game1.viewport.X -= viewportShakePrev.X;
+            Game1.viewport.Y -= viewportShakePrev.Y;
+        }
+
+        head.Duration -= (int)Game1.currentGameTime.ElapsedGameTime.Milliseconds;
+        if (head.Duration <= 0) {
+            viewportShakeQueue.RemoveAt(0);
+            viewportShakePrev = NullPoint;
+        }
+        else {
+            Game1.viewport.X += thisTime.X;
+            Game1.viewport.Y += thisTime.Y;
+            viewportShakePrev = thisTime;
+        }
+
+        return viewportShakeQueue.Count;
     }
 
     private static void StopViewportWatcher()
     {
-        viewportQueue.Clear();
+        viewportMoveQueue.Clear();
+        viewportShakeQueue.Clear();
         if (viewportWatcher is null) {
             return;
         }
@@ -196,3 +303,14 @@ internal class ViewportMove
     }
 }
 
+internal class ViewportShake
+{
+    public int Intensity = 4;
+    public int Duration = 0;
+
+    public ViewportShake(int intensity, int duration)
+    {
+        Intensity = intensity;
+        Duration = duration;
+    }
+}
