@@ -65,8 +65,7 @@ internal class Viewport
                 evt.InsertNextCommand($"{Main.ModId}_ViewportAwait move");
             }
             else {
-                context.LogError($"unknown argument '{args[i]}'",
-                        willSkip: false);
+                context.LogError($"unknown argument '{args[i]}'", willSkip: false);
             }
         }
         if (!queueMode) {
@@ -79,14 +78,36 @@ internal class Viewport
 
 
     /*
-     * ichortower.ECC_ViewportHalt
+     * ichortower.ECC_ViewportHalt [move] [shake]
      *
-     * Aborts any ongoing viewport moves (those started by _ViewportMove, not the vanilla
-     * viewport command) and empties the queue.
+     * Aborts viewport control by emptying one or both of the viewport queues. With no
+     * arguments, this will empty both queues. Specify just one ('move' or 'shake', both
+     * case-insensitive) to stop just that type and leave the other alone.
      */
     public static void command_ViewportHalt(SEvent evt, string[] args, EventContext context)
     {
-        StopViewportWatcher();
+        bool bothMode = true;
+        bool moveMode = false;
+        bool shakeMode = false;
+        for (int i = 1; i < args.Length; ++i) {
+            if (args[i].EqualsIgnoreCase("move")) {
+                moveMode = true;
+                bothMode = false;
+            }
+            else if (args[i].EqualsIgnoreCase("shake")) {
+                shakeMode = true;
+                bothMode = false;
+            }
+            else {
+                context.LogError($"unknown argument '{args[i]}'", willSkip: false);
+            }
+        }
+        if ((bothMode || moveMode)) {
+            viewportMoveQueue.Clear();
+        }
+        if ((bothMode || shakeMode)) {
+            viewportShakeQueue.Clear();
+        }
         ++evt.CurrentCommand;
     }
 
@@ -106,16 +127,16 @@ internal class Viewport
         bool moveMode = false;
         bool shakeMode = false;
         for (int i = 1; i < args.Length; ++i) {
-            bothMode = false;
             if (args[i].EqualsIgnoreCase("move")) {
                 moveMode = true;
+                bothMode = false;
             }
             else if (args[i].EqualsIgnoreCase("shake")) {
                 shakeMode = true;
+                bothMode = false;
             }
             else {
-                context.LogError($"unknown argument '{args[i]}'",
-                        willSkip: false);
+                context.LogError($"unknown argument '{args[i]}'", willSkip: false);
             }
         }
         if ((bothMode || moveMode) && viewportMoveQueue.Count > 0) {
@@ -145,8 +166,7 @@ internal class Viewport
                 evt.InsertNextCommand($"{Main.ModId}_ViewportAwait shake");
             }
             else {
-                context.LogError($"unknown argument '{args[i]}'",
-                        willSkip: false);
+                context.LogError($"unknown argument '{args[i]}'", willSkip: false);
             }
         }
         if (!queueMode) {
@@ -189,6 +209,12 @@ internal class Viewport
         }
         int moves = TryViewportMove();
         int shakes = TryViewportShake();
+        // this is to fix an edge case when using ViewportHalt
+        if (shakes == 0 && viewportShakePrev != NullPoint) {
+            Game1.viewport.X -= viewportShakePrev.X;
+            Game1.viewport.Y -= viewportShakePrev.Y;
+            viewportShakePrev = NullPoint;
+        }
         // FIXME raindrop position adjustment here
         if (moves + shakes == 0) {
             StopViewportWatcher();

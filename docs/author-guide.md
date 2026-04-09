@@ -24,6 +24,7 @@ This document explains how to use the event commands added by this mod.
   * [ActorHalt](#actorhalt)
 * [Viewport Control](#viewport-control)
   * [ViewportMove](#viewportmove)
+  * [ViewportShake](#viewportshake)
   * [ViewportAwait](#viewportawait)
   * [ViewportHalt](#viewporthalt)
 * [Ambient Light Control](#ambient-light-control)
@@ -223,7 +224,7 @@ A replacement for `faceDirection`, which can misbehave when used in a stream.
 The actor and direction arguments are the same as vanilla, but the optional
 extra argument is different: it can be either the string `delay`, which causes
 the default vanilla delay of 500 milliseconds, or an integer, which will cause
-a delay of that many milliseconds. Like `emote`, if the delay argument is
+a delay of that many milliseconds. Like `Emote`, if the delay argument is
 omitted, the default behavior is **not to block** after facing the actor.
 
 
@@ -368,19 +369,45 @@ until the queue has been finished.
 vanilla's `viewport move` moves the viewport. Do not mix and match them.
 
 
+### `ViewportShake`
+
+`ichortower.ECC_ViewportShake <intensity> <duration> [override] [wait]`
+
+This command sets up a screenshake effect for a given time. In general, it works
+just like `ViewportMove` but operates a separate queue; all moves go in the move
+queue, and all shakes go in the shake queue. Just like with `ViewportMove`, the
+optional `override` and `wait` arguments control whether to queue the shake and
+whether to block until the queue is empty.
+
+`intensity` is an integer and determines the maximum distance in screen pixels
+that the viewport can move away from its normal position in either direction; for
+example, `4` means each coordinate will be adjusted by between -4 and +4 pixels
+on each frame.
+
+`duration` is an integer and gives the screen shake time, in milliseconds.
+
+
 ### `ViewportAwait`
 
-`ichortower.ECC_ViewportAwait`
+`ichortower.ECC_ViewportAwait [move] [shake]`
 
-This command blocks until all queued viewport moves have completed.
+This command blocks until one or both of the viewport queues have completed.
+
+With no arguments, this will block until both queues (moves and shakes) are empty.
+Specify just one type (`move` or `shake`, both case-insensitive) to wait for just
+that queue and leave the other one to run. Specifying both is equivalent to the plain
+no-arguments version, but is more explicit.
 
 
 ### `ViewportHalt`
 
-`ichortower.ECC_ViewportHalt`
+`ichortower.ECC_ViewportHalt [move] [shake]`
 
-This command immediately halts any ongoing viewport moves and empties the
-viewport move queue.
+This command immediately empties one or both of the viewport queues, preventing
+them from continuing.
+
+The `move` and `shake` arguments are parsed just like `ViewportAwait`; leaving
+them out will default to stopping both queues.
 
 
 ## Ambient Light Control
