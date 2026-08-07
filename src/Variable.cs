@@ -143,6 +143,7 @@ internal class ExprNode
         Exponent,     // ^
         Multiply,     // *
         Divide,       // \, /
+        Modulus,      // %
         Add,          // +
         Subtract,     // -
         Equal,        // =, ==
@@ -161,6 +162,7 @@ internal class ExprNode
         { "*",  ExprOperator.Multiply },
         { "/",  ExprOperator.Divide },
         { "\\", ExprOperator.Divide },
+        { "%",  ExprOperator.Modulus },
         { "+",  ExprOperator.Add },
         { "-",  ExprOperator.Subtract },
         { "=",  ExprOperator.Equal },
@@ -221,6 +223,7 @@ internal class ExprNode
             ExprOperator.Exponent => 4,
             ExprOperator.Multiply => 3,
             ExprOperator.Divide => 3,
+            ExprOperator.Modulus => 3,
             ExprOperator.Add => 2,
             ExprOperator.Subtract => 2,
             ExprOperator.Equal => 1,
@@ -285,6 +288,7 @@ internal class ExprNode
         case ExprOperator.Exponent:
         case ExprOperator.Multiply:
         case ExprOperator.Divide:
+        case ExprOperator.Modulus:
         case ExprOperator.Add:
         case ExprOperator.Subtract:
         case ExprOperator.LessThan:
@@ -312,6 +316,9 @@ internal class ExprNode
             break;
         case ExprOperator.Divide:
             ret = $"{l / r}";
+            break;
+        case ExprOperator.Modulus:
+            ret = $"{l % r}";
             break;
         case ExprOperator.Add:
             ret = $"{l + r}";
@@ -499,7 +506,8 @@ internal class ExprNode
                 });
                 i += val.Length + 1;
             }
-            // FIXME negative ints
+            // this doesn't support negative integers directly; it reads the - operator
+            // and then an integer. ParseArray handles the negation
             else if (char.IsLetterOrDigit(c)) {
                 if (!GetIntOrIdentifier(input, i, out string val, out ExprTokenType type,
                                         out err)) {
