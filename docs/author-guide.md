@@ -29,6 +29,7 @@ This document explains how to use the event commands added by this mod.
   * [ViewportHalt](#viewporthalt)
 * [Ambient Light Control](#ambient-light-control)
   * [AmbientLightShift](#ambientlightshift)
+  * [AmbientLightReset](#ambientlightreset)
   * [AmbientLightAwait](#ambientlightawait)
   * [AmbientLightHalt](#ambientlighthalt)
 * [World Control](#world-control)
@@ -64,9 +65,9 @@ For example, `move <npc> 3 0 2` blocks, because the optional `true`
 argument was not given, so the stream will wait until the move completes
 before running the next command.
 
-Unlike vanilla, Codex commands that have a behavior toggle argument (e.g.
-`ViewportMove`) are set up to expect a particular literal string instead of
-the boolean strings `false`/`true`. I made this choice for ideological
+**Note**: Unlike vanilla, Codex commands that have a behavior toggle argument
+(e.g. `ViewportMove`) are set up to expect a particular literal string instead
+of the boolean strings `false`/`true`. I made this choice for ideological
 reasons: I prefer when a boolean argument makes its purpose more clear at the
 call site, since for me it reduces the burden of remembering what "true"
 stands for in a particular command.
@@ -429,11 +430,14 @@ This command sets up a gradual ambient light shift.
 RGB values of the color that will be **subtracted** from white to generate the
 game tint, just as it is with vanilla's `ambientLight` command.
 
-**Note:** The game's draw code has a special case for when all three values of
-the ambient light color are 255 (which would normally mean full darkness): this
-is treated as full brightness instead, the same as `0 0 0`. I recommend
-avoiding this value, and using `254 254 254` instead if you need pitch black;
-it's close enough and won't cause flashing in and out of darkness.
+**Note:** The game's draw code has special treatment for the value `255 255 255`
+(pure white), so using it may cause confusion: while you might expect this
+value to generate pure darkness, instead it is treated as "disable ambient
+light", and will cause the game to fall back to its outdoor lighting value (if
+applicable) or to `0 0 0` (pure black, meaning full light with no tinting).
+This mod attempts to handle these situations gracefully, but it is difficult,
+so in general I recommend not using `255 255 255` unless you know what you're
+doing.
 
 `duration` is in milliseconds and determines how long the shift will take to
 complete.
@@ -442,6 +446,19 @@ Like with `ViewportMove`, by default, the shift will be queued behind any
 ongoing shifts, and the command will not block. Just like that command, you can
 give the optional argument `override` to first empty the queue before starting,
 and you can give the optional argument `wait` to block until the queue empties.
+
+
+### `AmbientLightReset`
+
+`ichortower.ECC_AmbientLightReset <duration> [override] [wait]`
+
+This command sets up a shift, just like `AmbientLightShift`, except the values
+used for the shift are automatically determined to be the ambient light setting
+that was in place when the event started. This allows you to easily undo
+whatever ambient light changes you made during your event without needing to
+know what they were ahead of time.
+
+The `duration`, `override`, and `wait` arguments work just like above.
 
 
 ### `AmbientLightAwait`
@@ -776,9 +793,10 @@ be more explicit to avoid parse errors (e.g. `-1 * myvar` instead of `-myvar`).
 </td>
 <td>
 
-Compare two values for equality (`=`) or inequality (`!=`). This accepts
-strings or integers (and is a lexical comparison, even for integers, so e.g.
-`1 = '1'` will evaluate to `true`).
+Compare two values for equality (`=`) or inequality (`!=`). This will evaluate
+to the string `true` or `false`, as appropriate. It accepts strings or integers
+(and is a lexical comparison, even for integers, so e.g. `1 = '1'` will
+evaluate to `true`).
 
 **Note for programmers**: You can use double-equals `==` for equality if you
 want. You're welcome.
