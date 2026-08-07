@@ -18,7 +18,7 @@ internal sealed class ModMain : Mod
 {
     public override void Entry(IModHelper helper)
     {
-        Main.Mod = this;
+        Main.Init(this);
 
         Type[] types = Assembly.GetExecutingAssembly().GetTypes();
         foreach (Type t in types) {
@@ -29,8 +29,6 @@ internal sealed class ModMain : Mod
                 $"{Main.ModId}_StreamStart");
         TriggerActionManager.RegisterAction($"{Main.ModId}_WorldAdvanceTime",
                 ichortower.ECC.World.traction_WorldAdvanceTime);
-
-        ichortower.TowerCore.ConsoleCommands.Register(this.GetType(), out int _);
     }
 
     [ConsoleCommand("ast", "directly eval an event variable string to test AST")]
@@ -68,6 +66,5 @@ internal sealed class ModMain : Mod
                         typeof(TokenParserDelegate), func));
             }
         }
-        ichortower.TowerCore.Patches.Apply(t, out var _);
     }
 }

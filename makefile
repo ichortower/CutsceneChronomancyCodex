@@ -9,7 +9,7 @@ MOD_DIR=${GAME_DIR}/Mods/${MOD_NAME}
 install: smapi
 
 smapi:
-	dotnet build /clp:NoSummary
+	dotnet build
 	install -m 644 LICENSE "${MOD_DIR}"
 
 clean:

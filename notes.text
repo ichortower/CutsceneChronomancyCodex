@@ -6,7 +6,10 @@ playerControl
 CG without map jank
 chu: can we get a way to define all event coords relatively
     like if you start an event with a tile action, make all coords mentioned within relative to the tile of the action
+animate/showframe nonstandard sizes
 
+ichortower.ECC_CGShow texture fadeIn time
+ichortower.ECC_CGShow texture zoomFrom x y time
 
 event commands with side effects that should be neutralized when isMemory:
 ETC time advance
